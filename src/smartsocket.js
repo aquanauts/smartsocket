@@ -17,7 +17,7 @@ const smartsocket = (function () {
             const event = e.data;
             const idx = event.indexOf(':');
             const key = event.slice(0, idx);
-            const value = event.slice(19 + 1);
+            const value = event.slice(idx + 1);
             socket.onEvent(key, value);
         }
         return socket;
@@ -25,7 +25,7 @@ const smartsocket = (function () {
 
     function showView(rootElem, config, socket) {
         const [viewName, opts] = parseHash();
-        const context = createContext(config, opts, socket);
+        const context = createContext(socket);
         const viewFn = config.appRoutes[viewName];
         if (viewFn) {
             rootElem.innerHTML = '';
@@ -45,29 +45,35 @@ const smartsocket = (function () {
         return Object.fromQueryString(hashParts.slice(1).join('-'));
     }
 
-    function createContext(elem, opts, socket) {
+    function createContext(socket) {
         // TODO
         // How do we handle changing subscriptions and view transitions?
         //      Could send an unsubscribeFromAll message here because we know the view is changing
-        const updateCallbacks = [];
+        const updateCallbacks = {
+            add: [],
+            delete: []
+        };
 
         socket.onEvent = function (key, value) {
-            for (var cb of updateCallbacks) {
-                cb(key, value);
+            const parts = key.split('/');
+            const type = parts[0];
+            for (var cb of updateCallbacks[type]) {
+                cb(...parts.slice(1), value);
             }
         };
         return {
-            subscribe: function(entity, id, column) {
-                // TODO Sends the subscription up the websocket to the server
+            subscribe: function(subscription) {
+                socket.send("subscribe:" + subscription)
             },
 
-            onUpdate: function(callback) {
-                updateCallbacks.push(callback);
+            onAdd: function(callback) {
+                updateCallbacks.add.push(callback);
             },
 
-            send: function(key, value) {
-                // TODO socket.send
+            onDelete: function(callback) {
+                updateCallbacks.delete.push(callback);
             },
+
             // TODO getOpts() with Object.freeze(opts)
         }
     }
@@ -89,14 +95,8 @@ const smartsocket = (function () {
         return currentHashState()[key];
     }
 
-    function template(name) {
-        // TODO Consider template element
-        return $('.templates .' + name).clone();
-    }
-
     return {
         onReady: onReady,
-        template: template,
         currentRoute: currentRoute,
         getHashState: getHashState,
         setHashState: setHashState,
