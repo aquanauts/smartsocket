@@ -2,25 +2,12 @@
 
 const smartsocket = (function () {
     function onReady(rootElem, config) {
-        const socket = connect();
+        // TODO URL?
+        const socket = smartsocket.window.createWebSocket();
         smartsocket.window.onHashChange(function() {
             showView(rootElem, config, socket);
         });
         showView(rootElem, config, socket);
-    }
-
-    function connect() {
-        // TODO URL?
-        const socket = smartsocket.window.createWebSocket();
-        socket.onmessage = function (e) {
-            // TODO Handle malformed keys with missing ':'
-            const event = e.data;
-            const idx = event.indexOf(':');
-            const key = event.slice(0, idx);
-            const value = event.slice(idx + 1);
-            socket.onEvent(key, value);
-        }
-        return socket;
     }
 
     function showView(rootElem, config, socket) {
@@ -53,14 +40,19 @@ const smartsocket = (function () {
             add: [],
             delete: []
         };
-
-        socket.onEvent = function (key, value) {
+        socket.onmessage = function (e) {
+            // TODO Handle malformed keys with missing ':'
+            const event = e.data;
+            const idx = event.indexOf(':');
+            const key = event.slice(0, idx);
+            const value = event.slice(idx + 1);
             const parts = key.split('/');
             const type = parts[0];
             for (var cb of updateCallbacks[type]) {
-                cb(...parts.slice(1), value);
+                cb(value, ...parts.slice(1));
             }
-        };
+        }
+
         return {
             subscribe: function(subscription) {
                 socket.send("subscribe:" + subscription)
@@ -95,11 +87,23 @@ const smartsocket = (function () {
         return currentHashState()[key];
     }
 
+    function testContext() {
+        const sentMessages = [];
+        const stubSocket = {
+            sentMessages: sentMessages,
+            send: function (msg) { sentMessages.push(msg) }
+        };
+        const context = createContext(stubSocket);
+        context.stubSocket = stubSocket;
+        return context;
+    }
+
     return {
         onReady: onReady,
         currentRoute: currentRoute,
-        getHashState: getHashState,
-        setHashState: setHashState,
+        testContext: testContext,
+        // TODO getHashState: getHashState,
+        // TODO setHashState: setHashState,
     };
 })();
 

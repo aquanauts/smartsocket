@@ -1,4 +1,10 @@
 
+
+## View examples
+
+# Entity inspector -- View and edit the details of an individual entity
+# Entity list -- Infinite list of entities that match a query or pattern
+
 ## Messages Types
 
 Messages in smartsocket are colon `:` delimited

@@ -37,6 +37,9 @@ deps: $(DEPS)
 test: $(DEPS) ## Run tests in a headless chrome browser
 	@$(NODE_INSTALL)/bin/npx jasmine-browser-runner runSpecs
 
+regression: $(DEPS) ## Run regression tests in a headless chrome browser
+	@$(NODE_INSTALL)/bin/npx jasmine-browser-runner runSpecs --config=spec/support/regression-config.json
+
 watch: $(DEPS) ## Run tests continuously
 	@find src spec | entr -cd $(NODE_INSTALL)/bin/npx jasmine-browser-runner runSpecs
 
