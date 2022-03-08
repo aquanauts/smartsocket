@@ -37,15 +37,15 @@ describe('Smartsocket', () => {
     });
 
     it('routes add events to the view', async () => {
-        const event = "add/users/brady:"
+        const event = "add:users-brady-name:Ben Rady"
         stubSocket.onmessage({data: event});
         const newElem = containerElem.querySelector('.list-view').lastChild;
-        expect(newElem.id).toEqual('users-brady');
+        expect(newElem.id).toEqual('users-brady-name');
     });
 
     it('routes delete events', async () => {
-        stubSocket.onmessage({data: "add/users/brady/email:brady@gmail.com"});
-        stubSocket.onmessage({data: "delete/users/brady:"});
+        stubSocket.onmessage({data: "add:users-brady-email:brady@gmail.com"});
+        stubSocket.onmessage({data: "delete:users-brady-email:"});
         expect(containerElem.querySelector('.list-view').children.length).toEqual(0);
     });
 
@@ -65,12 +65,11 @@ describe('Smartsocket', () => {
         });
 
         it('allows view to subscribe to changes', async () => {
-            expect(sentMessages).toContain('subscribe:users/brady');
+            expect(sentMessages).toContain('subscribe:users-brady');
         });
 
         it('routes add events to the view when subscribed', async () => {
-            // TODO I'm not sure that slashes are the best delimiter here
-            const event = "add/users/brady/email:brady@gmail.com"
+            const event = "add:users-brady-email:brady@gmail.com"
             stubSocket.onmessage({data: event});
             const newElem = containerElem.querySelector('.edit-view').lastChild;
             expect(newElem.innerText).toEqual('brady@gmail.com');
@@ -78,8 +77,8 @@ describe('Smartsocket', () => {
         });
 
         it('routes delete events', async () => {
-            stubSocket.onmessage({data: "add/users/brady/email:brady@gmail.com"});
-            stubSocket.onmessage({data: "delete/users/brady/email:"});
+            stubSocket.onmessage({data: "add:users-brady-email:brady@gmail.com"});
+            stubSocket.onmessage({data: "delete:users-brady-email:"});
             expect(containerElem.querySelector('.edit-view').children.length).toEqual(0);
         });
     });

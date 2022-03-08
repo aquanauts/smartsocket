@@ -2,8 +2,7 @@
 
 const smartsocket = (function () {
     function onReady(rootElem, config) {
-        // TODO URL?
-        const socket = smartsocket.window.createWebSocket();
+        const socket = smartsocket.window.createWebSocket(config.url);
         smartsocket.window.onHashChange(function() {
             showView(rootElem, config, socket);
         });
@@ -33,24 +32,20 @@ const smartsocket = (function () {
     }
 
     function createContext(socket) {
-        // TODO
-        // How do we handle changing subscriptions and view transitions?
-        //      Could send an unsubscribeFromAll message here because we know the view is changing
         const updateCallbacks = {
             add: [],
             delete: []
         };
         socket.onmessage = function (e) {
-            // TODO Handle malformed keys with missing ':'
-            const event = e.data;
-            const idx = event.indexOf(':');
-            const key = event.slice(0, idx);
-            const value = event.slice(idx + 1);
-            const parts = key.split('/');
-            const type = parts[0];
-            for (var cb of updateCallbacks[type]) {
-                cb(value, ...parts.slice(1));
+            const event = parseEvent(e.data);
+            for (var cb of updateCallbacks[event.type]) {
+                cb(event.key, event.value, event.key);
             }
+        }
+
+        function parseEvent(eventStr) {
+            const [type, key, value] = eventStr.split(":");
+            return {type, key, value};
         }
 
         return {
@@ -65,8 +60,6 @@ const smartsocket = (function () {
             onDelete: function(callback) {
                 updateCallbacks.delete.push(callback);
             },
-
-            // TODO getOpts() with Object.freeze(opts)
         }
     }
 
@@ -88,10 +81,7 @@ const smartsocket = (function () {
     }
 
     function testContext() {
-        const sentMessages = [];
-        const stubSocket = {
-            sentMessages: sentMessages,
-            send: function (msg) { sentMessages.push(msg) }
+        const sentMessages = []; const stubSocket = { sentMessages: sentMessages, send: function (msg) { sentMessages.push(msg) }
         };
         const context = createContext(stubSocket);
         context.stubSocket = stubSocket;
@@ -121,8 +111,6 @@ smartsocket.window = (function () {
     }
 
     function createWebSocket(url) {
-        // TODO replace with ReconnectingWebsocket?
-        // TODO Handle websocket disconnect by setting reloadOnClick
         return new WebSocket(url);
     };
 
@@ -132,3 +120,4 @@ smartsocket.window = (function () {
         onHashChange: onHashChange
     }
 })();
+
