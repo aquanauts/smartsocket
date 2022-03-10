@@ -1,0 +1,18 @@
+name: Test and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: make test
+        run: make test
+      - name: push git tag
+        if: github.ref == 'refs/heads/main'
+          run: |
+            git tag "${{ github.run_number }}" && git push origin "${{ github.run_number }}"
