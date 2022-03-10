@@ -1,5 +1,8 @@
 name: Continuous Deploy
 
+on:
+  - push
+
 jobs:
   test:
     runs-on: ubuntu-latest
