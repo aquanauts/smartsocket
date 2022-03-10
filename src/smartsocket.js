@@ -2,7 +2,10 @@
 
 const smartsocket = (function () {
     function connect(config) {
-        const socket = new ReconnectingSmartSocket(config.url);
+        const socketFn = config.socketFn || ((url, protocols) => new WebSocket(url, protocols));
+        const protocols = [];
+        const options = {};
+        const socket = new ReconnectingSmartSocket(config.url, protocols, options, socketFn);
         return createSocket(socket, config);
     }
 
@@ -52,7 +55,7 @@ const smartsocket = (function () {
         }
     }
 
-    function ReconnectingSmartSocket(url, protocols, options) {
+    function ReconnectingSmartSocket(url, protocols, options, socketFn) {
         var settings = {
             /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
             automaticOpen: true,
@@ -148,7 +151,7 @@ const smartsocket = (function () {
         };
 
         this.open = function (reconnectAttempt) {
-            ws = smartsocket.window.createWebSocket(self.url, protocols || []);
+            ws = socketFn(self.url, protocols || []);
             ws.binaryType = this.binaryType;
 
             if (reconnectAttempt) {
@@ -279,14 +282,3 @@ const smartsocket = (function () {
         connect: connect,
     };
 })();
-
-smartsocket.window = (function () {
-    function createWebSocket(url, protocols) {
-        return new WebSocket(url, protocols);
-    };
-
-    return {
-        createWebSocket
-    }
-})();
-

@@ -10,10 +10,11 @@ describe('Smartsocket', () => {
         stubSocket = {
             send: function (msg) { sentMessages.push(msg) }
         };
-        smartsocket.window = {
-            createWebSocket: function () { return stubSocket }
-        };
-        socket = smartsocket.connect({url: "localhost:1234", parser: JSON.parse});
+        socket = smartsocket.connect({
+            url: "localhost:1234",
+            parser: JSON.parse,
+            socketFn: () => stubSocket
+        });
     });
 
     function sendEvent(event) {
