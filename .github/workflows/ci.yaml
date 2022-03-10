@@ -14,5 +14,5 @@ jobs:
         run: make test
       - name: push git tag
         if: github.ref == 'refs/heads/main'
-          run: |
-            git tag "${{ github.run_number }}" && git push origin "${{ github.run_number }}"
+        run: |
+          git tag "${{ github.run_number }}" && git push origin "${{ github.run_number }}"
