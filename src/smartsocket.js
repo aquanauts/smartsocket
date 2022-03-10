@@ -1,56 +1,45 @@
 "use strict";
 
 const smartsocket = (function () {
-    function onReady(rootElem, config) {
-        const socket = smartsocket.window.createWebSocket(config.url);
-        smartsocket.window.onHashChange(function() {
-            showView(rootElem, config, socket);
-        });
-        showView(rootElem, config, socket);
+    function connect(config) {
+        const socket = new ReconnectingSmartSocket(config.url);
+        return createSocket(socket, config);
     }
 
-    function showView(rootElem, config, socket) {
-        const [viewName, opts] = parseHash();
-        const context = createContext(socket);
-        const viewFn = config.appRoutes[viewName];
-        if (viewFn) {
-            rootElem.innerHTML = '';
-            rootElem.append(viewFn(context));
-        }
-    };
-
-    function parseHash() {
-        const hash = smartsocket.window.getHash();
-        const hashParts = hash.split('-');
-        const viewName = hashParts[0];
-        return [viewName, {}];
-    }
-
-    function currentHashState() {
-        const hashParts = smartsocket.window.getHash().split('-');
-        return Object.fromQueryString(hashParts.slice(1).join('-'));
-    }
-
-    function createContext(socket) {
+    function createSocket(socket, config) {
+        let snapshot = {};
         const updateCallbacks = {
             add: [],
             delete: []
         };
         socket.onmessage = function (e) {
-            const event = parseEvent(e.data);
-            for (var cb of updateCallbacks[event.type]) {
-                cb(event.key, event.value, event.key);
+            const event = config.parser(e.data);
+            if (event.type === "add") {
+                snapshot[event.key] = event.value;
+                for (var cb of updateCallbacks[event.type]) {
+                    cb(event.key, event.value);
+                }
+            }
+            if (event.type === "delete") {
+                delete snapshot[event.key];
+                for (var cb of updateCallbacks[event.type]) {
+                    cb(event.key);
+                }
             }
         }
 
-        function parseEvent(eventStr) {
-            const [type, key, value] = eventStr.split(":");
-            return {type, key, value};
+        socket.onopen = (e) => {
+            snapshot = {};
+        }
+
+        function state() {
+            return snapshot;
         }
 
         return {
-            subscribe: function(subscription) {
-                socket.send("subscribe:" + subscription)
+            state,
+            send: function(message) {
+                socket.send(message);
             },
 
             onAdd: function(callback) {
@@ -63,61 +52,241 @@ const smartsocket = (function () {
         }
     }
 
-    // Public functions
+    function ReconnectingSmartSocket(url, protocols, options) {
+        var settings = {
+            /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
+            automaticOpen: true,
 
-    function setHashState(key, value) {
-        const newState = currentHashState();
-        newState[key] = value;
-        smartsocket.window.setHash(`${currentRoute()}-${Object.toQueryString(newState)}`);
-    }
+            /** The number of milliseconds to delay before attempting to reconnect. */
+            reconnectInterval: 1000,
 
-    function currentRoute() {
-        const [viewName, opts] = parseHash();
-        return viewName;
-    }
+            /** The maximum number of milliseconds to delay a reconnection attempt. */
+            maxReconnectInterval: 30000,
 
-    function getHashState(key) {
-        return currentHashState()[key];
-    }
+            /** The rate of increase of the reconnect delay. Allows reconnect attempts to back off when problems persist. */
+            reconnectDecay: 1.5,
 
-    function testContext() {
-        const sentMessages = []; const stubSocket = { sentMessages: sentMessages, send: function (msg) { sentMessages.push(msg) }
+            /** The maximum time in milliseconds to wait for a connection to succeed before closing and retrying. */
+            timeoutInterval: 2000,
+
+            /** The maximum number of reconnection attempts to make. Unlimited if null. */
+            maxReconnectAttempts: null,
+
+            /** The binary type, possible values 'blob' or 'arraybuffer', default 'blob'. */
+            binaryType: 'blob'
+        }
+        if (!options) { options = {}; }
+
+        // Overwrite and define settings with options if they exist.
+        for (var key in settings) {
+            if (typeof options[key] !== 'undefined') {
+                this[key] = options[key];
+            } else {
+                this[key] = settings[key];
+            }
+        }
+
+        // These should be treated as read-only properties
+
+        /** The URL as resolved by the constructor. This is always an absolute URL. Read only. */
+        this.url = url;
+
+        /** The number of attempted reconnects since starting, or the last successful connection. Read only. */
+        this.reconnectAttempts = 0;
+
+        /**
+         * The current state of the connection.
+         * Can be one of: WebSocket.CONNECTING, WebSocket.OPEN, WebSocket.CLOSING, WebSocket.CLOSED
+         * Read only.
+         */
+        this.readyState = WebSocket.CONNECTING;
+
+        /**
+         * A string indicating the name of the sub-protocol the server selected; this will be one of
+         * the strings specified in the protocols parameter when creating the WebSocket object.
+         * Read only.
+         */
+        this.protocol = null;
+
+        // Private state variables
+
+        var self = this;
+        var ws;
+        var forcedClose = false;
+        var timedOut = false;
+        var eventTarget = document.createElement('div');
+
+        // Wire up "on*" properties as event handlers
+
+        eventTarget.addEventListener('open',       function(event) { self.onopen(event); });
+        eventTarget.addEventListener('close',      function(event) { self.onclose(event); });
+        eventTarget.addEventListener('connecting', function(event) { self.onconnecting(event); });
+        eventTarget.addEventListener('message',    function(event) { self.onmessage(event); });
+        eventTarget.addEventListener('error',      function(event) { self.onerror(event); });
+
+        // Expose the API required by EventTarget
+
+        this.addEventListener = eventTarget.addEventListener.bind(eventTarget);
+        this.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);
+        this.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+
+        /**
+         * This function generates an event that is compatible with standard
+         * compliant browsers and IE9 - IE11
+         *
+         * This will prevent the error:
+         * Object doesn't support this action
+         *
+         * http://stackoverflow.com/questions/19345392/why-arent-my-parameters-getting-passed-through-to-a-dispatched-event/19345563#19345563
+         * @param s String The name that the event should use
+         * @param args Object an optional object that the event will use
+         */
+        function generateEvent(s, args) {
+            var evt = document.createEvent("CustomEvent");
+            evt.initCustomEvent(s, false, false, args);
+            return evt;
         };
-        const context = createContext(stubSocket);
-        context.stubSocket = stubSocket;
-        return context;
+
+        this.open = function (reconnectAttempt) {
+            ws = smartsocket.window.createWebSocket(self.url, protocols || []);
+            ws.binaryType = this.binaryType;
+
+            if (reconnectAttempt) {
+                if (this.maxReconnectAttempts && this.reconnectAttempts > this.maxReconnectAttempts) {
+                    return;
+                }
+            } else {
+                eventTarget.dispatchEvent(generateEvent('connecting'));
+                this.reconnectAttempts = 0;
+            }
+
+            var localWs = ws;
+            var timeout = setTimeout(function() {
+                timedOut = true;
+                localWs.close();
+                timedOut = false;
+            }, self.timeoutInterval);
+
+            ws.onopen = function(event) {
+                clearTimeout(timeout);
+                self.protocol = ws.protocol;
+                self.readyState = WebSocket.OPEN;
+                self.reconnectAttempts = 0;
+                var e = generateEvent('open');
+                e.isReconnect = reconnectAttempt;
+                reconnectAttempt = false;
+                eventTarget.dispatchEvent(e);
+            };
+
+            ws.onclose = function(event) {
+                clearTimeout(timeout);
+                ws = null;
+                if (forcedClose) {
+                    self.readyState = WebSocket.CLOSED;
+                    eventTarget.dispatchEvent(generateEvent('close'));
+                } else {
+                    self.readyState = WebSocket.CONNECTING;
+                    var e = generateEvent('connecting');
+                    e.code = event.code;
+                    e.reason = event.reason;
+                    e.wasClean = event.wasClean;
+                    eventTarget.dispatchEvent(e);
+                    if (!reconnectAttempt && !timedOut) {
+                        eventTarget.dispatchEvent(generateEvent('close'));
+                    }
+
+                    var timeout = self.reconnectInterval * Math.pow(self.reconnectDecay, self.reconnectAttempts);
+                    setTimeout(function() {
+                        self.reconnectAttempts++;
+                        self.open(true);
+                    }, timeout > self.maxReconnectInterval ? self.maxReconnectInterval : timeout);
+                }
+            };
+            ws.onmessage = function(event) {
+                var e = generateEvent('message');
+                e.data = event.data;
+                eventTarget.dispatchEvent(e);
+            };
+            ws.onerror = function(event) {
+                eventTarget.dispatchEvent(generateEvent('error'));
+            };
+        }
+
+        // Whether or not to create a websocket upon instantiation
+        if (this.automaticOpen == true) {
+            this.open(false);
+        }
+
+        /**
+         * Transmits data to the server over the WebSocket connection.
+         *
+         * @param data a text string, ArrayBuffer or Blob to send to the server.
+         */
+        this.send = function(data) {
+            if (ws) {
+                return ws.send(data);
+            } else {
+                throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
+            }
+        };
+
+        /**
+         * Closes the WebSocket connection or connection attempt, if any.
+         * If the connection is already CLOSED, this method does nothing.
+         */
+        this.close = function(code, reason) {
+            // Default CLOSE_NORMAL code
+            if (typeof code == 'undefined') {
+                code = 1000;
+            }
+            forcedClose = true;
+            if (ws) {
+                ws.close(code, reason);
+            }
+        };
+
+        /**
+         * Additional public API method to refresh the connection if still open (close, re-open).
+         * For example, if the app suspects bad data / missed heart beats, it can try to refresh.
+         */
+        this.refresh = function() {
+            if (ws) {
+                ws.close();
+            }
+        };
     }
+
+    /**
+     * An event listener to be called when the WebSocket connection's readyState changes to OPEN;
+     * this indicates that the connection is ready to send and receive data.
+     */
+    ReconnectingSmartSocket.prototype.onopen = function(event) {};
+    /** An event listener to be called when the WebSocket connection's readyState changes to CLOSED. */
+    ReconnectingSmartSocket.prototype.onclose = function(event) {};
+    /** An event listener to be called when a connection begins being attempted. */
+    ReconnectingSmartSocket.prototype.onconnecting = function(event) {};
+    /** An event listener to be called when a message is received from the server. */
+    ReconnectingSmartSocket.prototype.onmessage = function(event) {};
+    /** An event listener to be called when an error occurs. */
+    ReconnectingSmartSocket.prototype.onerror = function(event) {};
+
+    ReconnectingSmartSocket.CONNECTING = WebSocket.CONNECTING;
+    ReconnectingSmartSocket.OPEN = WebSocket.OPEN;
+    ReconnectingSmartSocket.CLOSING = WebSocket.CLOSING;
+    ReconnectingSmartSocket.CLOSED = WebSocket.CLOSED;
 
     return {
-        onReady: onReady,
-        currentRoute: currentRoute,
-        testContext: testContext,
-        // TODO getHashState: getHashState,
-        // TODO setHashState: setHashState,
+        connect: connect,
     };
 })();
 
 smartsocket.window = (function () {
-    function getHash() {
-        return window.location.hash;
-    }
-
-    function setHash(newHash) {
-        window.location.hash = newHash
-    }
-
-    function onHashChange(callback) {
-        window.onhashchange = callback;
-    }
-
-    function createWebSocket(url) {
-        return new WebSocket(url);
+    function createWebSocket(url, protocols) {
+        return new WebSocket(url, protocols);
     };
 
     return {
-        getHash: getHash,
-        setHash: setHash,
-        onHashChange: onHashChange
+        createWebSocket
     }
 })();
 
