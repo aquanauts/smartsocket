@@ -3,11 +3,10 @@
   <head></head>
   <body>
     <h3>Hi there</h3>
-    <script type="text/javascript" src='file:///home/brady/src/smartsocket/src/control.js'>
+    <script type="text/javascript" src='file:///home/brady/src/smartsocket/src/control.js' onload=' control.connect({url: "ws://localhost:8080/client"})'>
     </script>
 
     <script type="text/javascript">
-      control.connect({url: "ws://localhost:8080/client"})
     </script>
   </body>
 </html>

@@ -3,6 +3,7 @@
   <head></head>
   <body>
     <iframe id="docview"></iframe>
+    <pre id="console"></pre>
     <script type="text/javascript">
       console.log("Connecting")
       const ws = new WebSocket("ws://localhost:8080/viewer");
@@ -11,7 +12,14 @@
         const state = JSON.parse(e.data)
         console.log(state);
         iframe.contentWindow.document.open();
-        iframe.contentWindow.document.write(state["document.documentElement.outerHTML"]);
+        const el = document.createElement('html')
+        el.innerHTML = state["document.documentElement.outerHTML"];
+        el.querySelectorAll('script').forEach((node) => {
+          if (node.src.indexOf("control.js") != -1) {
+            node.parentNode.removeChild(node);
+          }
+        })
+        iframe.contentWindow.document.write(el.innerHTML);
         iframe.contentWindow.document.close();
         iframe.height = state["innerHeight"]
         iframe.width = state["innerWidth"]

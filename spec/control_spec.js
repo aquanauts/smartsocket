@@ -26,7 +26,7 @@ describe('Control socket', () => {
         sentMessages = []
         stubSocket = {
             close: () => { stubSocket.readyState = WebSocket.CLOSED },
-            send: function (msg) { sentMessages.push(msg) },
+            send: function (msg) { sentMessages.push(JSON.parse(msg)) },
         }
         socket = control.connect({
             url: "localhost:1234",
@@ -38,12 +38,12 @@ describe('Control socket', () => {
 
     it('sends tracked properties when connecting', async () => {
         stubSocket.onopen()
-        expect(sentMessages).toContain('location.hash:')
+        expect(sentMessages).toContain({"location.hash":""})
     })
 
     it('sends static properties when connecting', async () => {
         stubSocket.onopen()
-        expect(sentMessages).toContain('location.host:localhost:12345')
+        expect(sentMessages).toContain({'location.host':'localhost:12345'})
     })
 
     it('does not send stats until connected', async () => {
@@ -54,12 +54,12 @@ describe('Control socket', () => {
         stubSocket.onopen()
         stubWindow.location.hash = '#newhash'
         eventListeners['hashchange']()
-        expect(sentMessages).toContain('location.hash:#newhash')
+        expect(sentMessages).toContain({'location.hash':'#newhash'})
     })
 
     it('sends polled properties when connected', async () => {
         stubSocket.onopen()
-        expect(sentMessages).toContain('navigator.cookieEnabled:true')
+        expect(sentMessages).toContain({'navigator.cookieEnabled':true})
     })
 
     it('only sends polled properties when they change', async () => {
@@ -68,11 +68,18 @@ describe('Control socket', () => {
         stubWindow.navigator.cookieEnabled = false
         intervalFn()
         intervalFn()
-        expect(sentMessages).toEqual(['navigator.cookieEnabled:false'])
+        expect(sentMessages).toEqual([{'navigator.cookieEnabled':false}])
     })
 
     it('evaluates any message sent', async () => {
         stubSocket.onmessage({data: "1+1"});
-        expect(sentMessages).toEqual(['$_:2'])
+        expect(sentMessages).toEqual([{'$_':2}])
+    });
+
+    it('sends an error object if evaluation fails', async () => {
+        stubSocket.onmessage({data: "1+"})
+        let error = sentMessages[0]['$__']
+        expect(error.message).toEqual("Unexpected end of input")
+        expect(error.stack).toContain("Object.ws.onmessage")
     });
 })

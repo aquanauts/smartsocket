@@ -26,8 +26,18 @@ const control = (function () {
         }
 
         socket.onmessage = (e) => {
-            const result = eval(e.data);
-            socket.send(`$_:${JSON.stringify(result)}`)
+            try {
+                const result = eval(e.data.toString());
+                send("$_", result)
+            } catch(e) {
+                send("$__", {message: e.message, stack: e.stack})
+            }
+        }
+
+        function send(key, value) {
+            const msg = {}
+            msg[key] = value
+            socket.send(JSON.stringify(msg))
         }
 
         function tick() {
@@ -45,7 +55,7 @@ const control = (function () {
             const writableStats = Array.from(dirtyStats)
             while(writableStats.length && socket.readyState === InternalSocket.OPEN) {
                 const statName = writableStats.shift();
-                socket.send(`${statName}:${statCache[statName]}`)
+                send(statName, statCache[statName])
                 dirtyStats.delete(statName);
             }
         }
