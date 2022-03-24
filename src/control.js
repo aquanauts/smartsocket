@@ -59,7 +59,8 @@ const control = (function () {
         ]
 
         const polledProperties = [
-            'navigator.cookieEnabled'
+            'navigator.cookieEnabled',
+            'document.documentElement.outerHTML'
         ]
 
         for (let [eventName, properties] of trackedProperties) {

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body>
+    <iframe id="docview"></iframe>
+    <script type="text/javascript">
+      console.log("Connecting")
+      const ws = new WebSocket("ws://localhost:8080/viewer");
+      ws.onmessage = (e) => {
+        const iframe = document.querySelector('#docview')
+        const state = JSON.parse(e.data)
+        console.log(state);
+        iframe.contentWindow.document.open();
+        iframe.contentWindow.document.write(state["document.documentElement.outerHTML"]);
+        iframe.contentWindow.document.close();
+        iframe.height = state["innerHeight"]
+        iframe.width = state["innerWidth"]
+      }
+    </script>
+  </body>
+</html>
