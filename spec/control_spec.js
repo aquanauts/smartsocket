@@ -15,6 +15,9 @@ describe('Control socket', () => {
             navigator: { cookieEnabled: true},
             innerHeight: 600,
             innerWidth: 400,
+            document: {
+                documentElement: { outerHTML: "<html>" }
+            },
             addEventListener: (eventName, callback) => {
                 eventListeners[eventName] = callback
             },
