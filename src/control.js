@@ -19,32 +19,42 @@ const control = (function () {
     }
 
     function initSocket(socket, windowRef) {
-        const pollCache = {};
-        let cachedStats = []
+        const statCache = {}
+        let dirtyStats = new Set()
         socket.onopen = (e) => {
             flushCache()
         }
 
+        socket.onmessage = (e) => {
+            const result = eval(e.data);
+            socket.send(`$_:${JSON.stringify(result)}`)
+        }
+
         function tick() {
             for(let property of polledProperties) {
-                const newVal = readProperty(windowRef, property);
-                if (pollCache[property] !== newVal) {
-                    cachedStats.push(property + ":" + newVal)
-                    pollCache[property] = newVal
+                const newVal = readProperty(windowRef, property)
+                if (statCache[property] !== newVal) {
+                    dirtyStats.add(property)
+                    statCache[property] = newVal
                 }
             }
             flushCache()
         }
 
         function flushCache() {
-            while(cachedStats.length && socket.readyState === InternalSocket.OPEN) {
-                socket.send(cachedStats.shift())
+            const writableStats = Array.from(dirtyStats)
+            while(writableStats.length && socket.readyState === InternalSocket.OPEN) {
+                const statName = writableStats.shift();
+                socket.send(`${statName}:${statCache[statName]}`)
+                dirtyStats.delete(statName);
             }
         }
 
         function writeStats(properties) {
             for(let property of properties) {
-                cachedStats.push(property + ":" + readProperty(windowRef, property))
+                const newVal = readProperty(windowRef, property);
+                dirtyStats.add(property)
+                statCache[property] = newVal
             }
             flushCache()
         }
@@ -65,7 +75,6 @@ const control = (function () {
 
         for (let [eventName, properties] of trackedProperties) {
             writeStats(properties)
-            // TODO make sure to debounce these. Resize events (for example) could get noisy
             windowRef.addEventListener(eventName, () => { writeStats(properties) })
         }
 

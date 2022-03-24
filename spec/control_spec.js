@@ -70,4 +70,9 @@ describe('Control socket', () => {
         intervalFn()
         expect(sentMessages).toEqual(['navigator.cookieEnabled:false'])
     })
+
+    it('evaluates any message sent', async () => {
+        stubSocket.onmessage({data: "1+1"});
+        expect(sentMessages).toEqual(['$_:2'])
+    });
 })
