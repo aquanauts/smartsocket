@@ -7,9 +7,11 @@ describe('Control socket', () => {
     var socket
     var eventListeners
     var intervalFn
+    var timeoutFns
 
     beforeEach(() => {
         eventListeners = {}
+        timeoutFns = {}
         stubWindow = {
             location: { host: 'localhost:12345', hash: ''},
             navigator: { cookieEnabled: true},
@@ -21,20 +23,33 @@ describe('Control socket', () => {
             addEventListener: (eventName, callback) => {
                 eventListeners[eventName] = callback
             },
-            setInterval: (fn) => { intervalFn = fn }
+            setInterval: (fn) => { intervalFn = fn },
+            setTimeout: (fn, duration) => { timeoutFns[duration] = fn },
+            WebSocket: function(url, protocols) {
+                stubSocket = this;
+                this.close = () => { stubSocket.readyState = WebSocket.CLOSED }
+                this.send = (msg) => { sentMessages.push(JSON.parse(msg)) }
+            }
         }
         sentMessages = []
-        stubSocket = {
-            close: () => { stubSocket.readyState = WebSocket.CLOSED },
-            send: function (msg) { sentMessages.push(JSON.parse(msg)) },
-        }
         socket = control.connect({
             url: "localhost:1234",
-            window: stubWindow,
-            socketFn: () => stubSocket
+            window: stubWindow
         })
-        socket.readyState = WebSocket.OPEN
     })
+
+    it('provides the URL as a read-only property', async () => {
+        expect(socket.url).toEqual("localhost:1234");
+        expect(Object.getOwnPropertyDescriptor(socket, 'url').writable).toBeFalsy()
+    });
+
+    it('tracks the number of reconnect attempts', async () => {
+        expect(socket.reconnectAttempts).toEqual(0);
+        stubSocket.onclose({})
+        timeoutFns[1000](); // 1000ms reconnect timer
+        expect(socket.reconnectAttempts).toEqual(1);
+        expect(Object.getOwnPropertyDescriptor(socket, 'reconnectAttempts').writable).toBeFalsy()
+    });
 
     it('sends tracked properties when connecting', async () => {
         stubSocket.onopen()
@@ -80,6 +95,6 @@ describe('Control socket', () => {
         stubSocket.onmessage({data: "1+"})
         let error = sentMessages[0]['$__']
         expect(error.message).toEqual("Unexpected end of input")
-        expect(error.stack).toContain("Object.ws.onmessage")
+        expect(error.stack).toContain("WebSocket.ws.onmessage")
     });
 })

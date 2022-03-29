@@ -5,12 +5,10 @@
     <iframe id="docview"></iframe>
     <pre id="console"></pre>
     <script type="text/javascript">
-      console.log("Connecting")
       const ws = new WebSocket("ws://localhost:8080/viewer");
       ws.onmessage = (e) => {
         const iframe = document.querySelector('#docview')
         const state = JSON.parse(e.data)
-        console.log(state);
         iframe.contentWindow.document.open();
         const el = document.createElement('html')
         el.innerHTML = state["document.documentElement.outerHTML"];
