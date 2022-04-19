@@ -1,0 +1,186 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="/aquatic.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./vendor/bootstrap-4.3.1/bootstrap.min.css">
+    <link rel="icon" type="image/png" href="/img/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <script type="text/javascript" src='/vendor/jquery-2.2.4/jquery-2.2.4.min.js'></script>
+    <script type="text/javascript" src='/js/events.js'></script>
+    <script type="text/javascript" src='/js/templates.js'></script>
+    <script type="text/javascript" src='/js/router.js'></script>
+  </head>
+
+  <body>
+    <div class="markup">
+
+      <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <span class='banner'>
+          <a href="#home" class='navbar-brand'>
+            <img class='logo' src="/img/icon.svg" alt="Aquatic">
+            <span class="title">
+              MyProject
+            </span>
+          </a>
+        </span>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#home">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#profile?name=Bob&group=backoffice">Profile</a>
+            </li>
+          </ul>
+          <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+          </form>
+        </div>
+      </nav>
+
+      <div class="view-container container-fluid">
+      </div>
+
+      <div class="templates">
+
+        <div class="homeView mt-5">
+          <div class="row">
+            <div class="mx-auto">
+              <h1 class='title'>The Aquatic Webapp Theme</h1>
+              <p>Use this theme as a starting point and change it as you see fit.</p>
+              <h3 class='mt-3 mb-3'>What's in the box?</h3>
+
+              <div class="card-group">
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Router</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Single Page Application</h5>
+                    <p class="card-text">Uses a single page app router based on the <code>hashchange</code> event to allow you to change views without reloading the page. This keeps state and network connections (like websockets) open through page transitions.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://github.aq.tc/aquatic/web_template/blob/master/web/README.md#adding-views" target='_blank' class="btn btn-primary">Learn More</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Templates</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Native HTML Templates</h5>
+                    <p class="card-text">Uses a simple, web-standards compliant approach to building HTML templates.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://github.aq.tc/aquatic/web_template/blob/master/web/README.md#using-templates" target='_blank' class="btn btn-primary">Documentation</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Events</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">HTML Event Pub/Sub</h5>
+                    <p class="card-text"></p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://github.aq.tc/aquatic/web_template/blob/master/web/README.md#event-pubsub" target='_blank' class="btn btn-primary">Examples</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-group">
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">CSS Components + Grid</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Bootstrap 4</h5>
+                    <p class="card-text">Includes a responsive grid system for laying out elements on a page, and a set of components for building forms, lists, and tables.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://getbootstrap.com/docs/4.3/layout/overview/" target='_blank' class="btn btn-primary">Overview</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">JavaScript Library</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">JQuery 2</h5>
+                    <p class="card-text">Easy manipulation of HTML elements, event handling, and tools for making HTTP requests.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://api.jquery.com/" target='_blank' class="btn btn-primary">API Docs</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Testing Framework</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Jasmine</h5>
+                    <p class="card-text">Write browser-based tests for your JavaScript (and HTML) using RSpec/BDD style syntax.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://jasmine.github.io/tutorials/your_first_suite" target='_blank' class="btn btn-primary">Tutorial</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-group">
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Web Standards</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Support for ES6 Modules</h5>
+                    <p class="card-text">Uses a single page app router based on the <code>hashchange</code> event to prevent page reloads and keep connections (like websockets) open through page transitions.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://exploringjs.com/es6/ch_modules.html" target='_blank' class="btn btn-primary">Learn More</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Developer Tools</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">No Build Step</h5>
+                    <p class="card-text">This template is a static set of files with no "compilation" step required. The code you write is what is rendered by the browser. This makes your apps <a href="https://github.com/livereload/livereload-js">LiveReload</a> friendly and makes debugging easier.</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei?hl=en" target='_blank' class="btn btn-primary">Install LiveReload</a>
+                  </div>
+                </div>
+
+                <div class="card border-dark mb-3" style="max-width: 18rem;">
+                  <div class="card-header">Browser</div>
+                  <div class="card-body text-dark">
+                    <h5 class="card-title">Designed For Chrome</h5>
+                    <p class="card-text">Designed and tested in Google Chrome. Might work in other browsers too!</p>
+                  </div>
+                  <div class="card-footer text-center">
+                    <a href="https://chrome.google.com" target='_blank' class="btn btn-primary">Download Chrome</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="profileView">
+          <h1 class='title'>Profile</h1>
+          <div class="ml-5">
+            <h3 class="name"></h3>
+            <h5 class="group"></h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import {routes, createContext} from './js/app.js';
+      window.appRoutes = routes();
+      const context = createContext(); // Add 'global' state here
+      $(window).ready(() => { routerOnReady(window.appRoutes, context); });
+    </script>
+  </body>
+</html>
