@@ -1,0 +1,44 @@
+/** Color Palette **/
+:root {
+  --color-text: rgb(21, 65, 81);
+  --color-highlight: rgb(253, 183, 22); /** Orange **/
+  --color-accent: #3F978F; /** Sea green **/
+  --color-primary: #2F7086; /** Light blue **/
+  --color-secondary: #224753; /** Blue **/
+  --color-field: #1B3943;  /** Dark Blue **/
+}
+
+.bg-color-field         { background: var(--color-field); }
+.bg-color-highlight     { background: var(--color-highlight); }
+.bg-color-accent        { background: var(--color-accent); }
+.bg-color-secondary     { background: var(--color-secondary); }
+.bg-color-primary       { background: var(--color-primary); }
+
+/** Spacing and sizes **/
+:root {
+  --size-navbar-height: 48px;
+}
+
+body {
+  background: var(--color-field);
+  color: var(--color-text);
+  font-family: 'Open Sans', sans-serif!important;
+}
+
+.templates {
+  display: none;
+}
+
+.view-container {
+  margin-top: var(--size-navbar-height);
+  padding-top: 20px;
+}
+
+.navbar .logo {
+  height: calc(var(--size-navbar-height) - 16px)
+}
+
+.navbar .title {
+  font-size: calc(var(--size-navbar-height) / 2);
+  vertical-align: top;
+}
