@@ -1,5 +1,8 @@
 "use strict";
 
+const ADD_TYPE = "a"
+const DELETE_TYPE = "d"
+
 const smartsocket = (function () {
     function connect(config) {
         const socketFn = config.socketFn || ((url, protocols) => new WebSocket(url, protocols));
@@ -11,19 +14,18 @@ const smartsocket = (function () {
 
     function createSocket(socket, config) {
         let snapshot = {};
-        const updateCallbacks = {
-            a: [],
-            d: []
-        };
+        const updateCallbacks = {};
+        updateCallbacks[ADD_TYPE] = [];
+        updateCallbacks[DELETE_TYPE] = [];
         socket.onmessage = function (e) {
             const event = config.parser(e.data);
-            if (event.type === "a") {
+            if (event.type === ADD_TYPE) {
                 snapshot[event.key] = event.value;
                 for (let cb of updateCallbacks[event.type]) {
                     cb(event.key, event.value);
                 }
             }
-            if (event.type === "d") {
+            if (event.type === DELETE_TYPE) {
                 delete snapshot[event.key];
                 for (let cb of updateCallbacks[event.type]) {
                     cb(event.key);
@@ -31,7 +33,7 @@ const smartsocket = (function () {
             }
         }
 
-        socket.onopen = (e) => {
+        socket.onopen = () => {
             snapshot = {};
         }
 
@@ -46,11 +48,11 @@ const smartsocket = (function () {
             },
 
             onAdd: function(callback) {
-                updateCallbacks.a.push(callback);
+                updateCallbacks[ADD_TYPE].push(callback);
             },
 
             onDelete: function(callback) {
-                updateCallbacks.d.push(callback);
+                updateCallbacks[DELETE_TYPE].push(callback);
             },
         }
     }

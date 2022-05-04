@@ -36,7 +36,7 @@
       const ws = new WebSocket("ws://localhost:8080/ws");
       ws.onmessage = (e) => {
         const msg = JSON.parse(e.data)
-        if (msg.type === "a") {
+        if (msg.type === "a") { // Add message
           let row = tbody.querySelector('#' + msg.key);
           if (row === null) {
             row = document.createElement('tr');
@@ -49,7 +49,7 @@
           row.childNodes[1].innerText = msg.value;
 
         }
-        if (msg.type === "d") {
+        if (msg.type === "d") { // Delete message
           let row = tbody.querySelector('#' + msg.key);
           row.remove()
         }
