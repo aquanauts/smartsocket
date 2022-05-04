@@ -1,5 +1,5 @@
 SHELL := $(shell which bash) # Use bash instead of bin/sh as shell
-NODE_VERSION := 12.4.0
+NODE_VERSION := 17.0.1
 NODE_INSTALL := $(CURDIR)/.node-$(NODE_VERSION)
 NODE := $(NODE_INSTALL)/bin/node
 NPM := $(NODE_INSTALL)/bin/npm
@@ -7,7 +7,7 @@ PROJECT_NAME:=$(shell basename $(PWD))
 DEPS := node_modules/.deps
 CHROME_VERSION=94.0.4606.61
 CHROME_ROOT=.chrome-$(CHROME_VERSION)
-export PATH:=$(CURDIR)/$(NODE_INSTALL)/bin:$(PATH):$(CHROME_ROOT)
+export PATH:=$(NODE_INSTALL)/bin:$(PATH):$(CHROME_ROOT)
 
 help:
 	@grep -E '^[0-9a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
