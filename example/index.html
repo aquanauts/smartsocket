@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head></head>
+  <body>
+    <h1>Smartsocket Example</h1>
+    <hr>
+    <h4>Current State</h4>
+    <table id='table' border="1">
+      <thead>
+        <tr>
+          <th>Keys</th>
+          <th>Values</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <hr>
+    <h4>Add State</h4>
+    <form id="addForm">
+      <label for="keyInput">Key:</label>
+      <input id="keyInput" type="text">
+      <label for="valueInput">Value: </label>
+      <input id="valueInput" type="text">
+      <button>Send</button>
+    </form>
+    <hr>
+    <h4>Delete State</h4>
+    <form id="deleteForm">
+      <label for="deleteInput">Key:</label>
+      <input id="deleteInput" type="text">
+      <button>Delete</button>
+    </form>
+    <script type="text/javascript">
+      const tbody = window.table.querySelector('tbody');
+      const ws = new WebSocket("ws://localhost:8080/ws");
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data)
+        if (msg.type === "a") {
+          let row = tbody.querySelector('#' + msg.key);
+          if (row === null) {
+            row = document.createElement('tr');
+            row.id = msg.key
+            row.append(document.createElement('td'));
+            row.append(document.createElement('td'));
+            tbody.append(row);
+          }
+          row.childNodes[0].innerText = msg.key;
+          row.childNodes[1].innerText = msg.value;
+
+        }
+        if (msg.type === "d") {
+          let row = tbody.querySelector('#' + msg.key);
+          row.remove()
+        }
+      }
+
+      window.addForm.onsubmit = function () {
+        ws.send(JSON.stringify({type:"a", key: window.keyInput.value, value: window.valueInput.value}));
+        window.keyInput.value = ""
+        window.valueInput.value = ""
+        window.keyInput.focus()
+        return false;
+      }
+
+      window.deleteForm.onsubmit = function () {
+        ws.send(JSON.stringify({type:"d", key: window.deleteInput.value}));
+        window.deleteInput.value = ""
+        window.deleteInput.focus()
+        return false;
+      }
+
+      function deleteIt(key) {
+        ws.send(JSON.stringify({type:"delete", key}));
+      }
+    </script>
+  </body>
+</html>

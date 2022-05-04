@@ -12,20 +12,20 @@ const smartsocket = (function () {
     function createSocket(socket, config) {
         let snapshot = {};
         const updateCallbacks = {
-            add: [],
-            delete: []
+            a: [],
+            d: []
         };
         socket.onmessage = function (e) {
             const event = config.parser(e.data);
-            if (event.type === "add") {
+            if (event.type === "a") {
                 snapshot[event.key] = event.value;
-                for (var cb of updateCallbacks[event.type]) {
+                for (let cb of updateCallbacks[event.type]) {
                     cb(event.key, event.value);
                 }
             }
-            if (event.type === "delete") {
+            if (event.type === "d") {
                 delete snapshot[event.key];
-                for (var cb of updateCallbacks[event.type]) {
+                for (let cb of updateCallbacks[event.type]) {
                     cb(event.key);
                 }
             }
@@ -46,11 +46,11 @@ const smartsocket = (function () {
             },
 
             onAdd: function(callback) {
-                updateCallbacks.add.push(callback);
+                updateCallbacks.a.push(callback);
             },
 
             onDelete: function(callback) {
-                updateCallbacks.delete.push(callback);
+                updateCallbacks.d.push(callback);
             },
         }
     }

@@ -1,6 +1,6 @@
 SHELL := $(shell which bash) # Use bash instead of bin/sh as shell
 NODE_VERSION := 12.4.0
-NODE_INSTALL := .node-$(NODE_VERSION)
+NODE_INSTALL := $(CURDIR)/.node-$(NODE_VERSION)
 NODE := $(NODE_INSTALL)/bin/node
 NPM := $(NODE_INSTALL)/bin/npm
 PROJECT_NAME:=$(shell basename $(PWD))
@@ -33,16 +33,21 @@ $(DEPS): package.json | $(NPM) $(NODE) $(CHROME_ROOT)
 	@$(NPM) install
 	@cp $^ $(DEPS)
 
+.PHONY: deps
 deps: $(DEPS)
 
+.PHONY: test
 test: $(DEPS) ## Run tests in a headless chrome browser
 	node_modules/karma/bin/karma start --single-run --no-auto-watch karma.conf.js
 
+.PHONY: watch
 watch: $(DEPS) ## Run tests continuously
 	node_modules/karma/bin/karma start karma.conf.js
 
-example: $(DEPS)
-	@$(NODE_INSTALL)/bin/node server.js
+.PHONY: example
+example: $(DEPS) ## Run an example application
+	@cd example && $(NODE_INSTALL)/bin/node server.js
 
+.PHONY: serve
 serve: $(DEPS) ## Serve the browser test runner on localhost:8888 for debugging
 	@find src spec | entr -cd $(NODE_INSTALL)/bin/npx jasmine-browser-runner serve
