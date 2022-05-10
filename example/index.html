@@ -33,7 +33,7 @@
     </form>
     <script type="text/javascript">
       const tbody = window.table.querySelector('tbody');
-      const ws = new WebSocket("ws://localhost:8080/ws");
+      const ws = new WebSocket(`ws://${window.location.host}/ws`);
       ws.onmessage = (e) => {
         const msg = JSON.parse(e.data)
         if (msg.type === "a") { // Add message
@@ -68,10 +68,6 @@
         window.deleteInput.value = ""
         window.deleteInput.focus()
         return false;
-      }
-
-      function deleteIt(key) {
-        ws.send(JSON.stringify({type:"delete", key}));
       }
     </script>
   </body>
