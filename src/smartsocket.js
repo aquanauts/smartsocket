@@ -181,6 +181,11 @@ const smartsocket = (function () {
                 e.isReconnect = reconnectAttempt;
                 reconnectAttempt = false;
                 eventTarget.dispatchEvent(e);
+
+                for (let message of cachedMessages) {
+                    ws.send(message);
+                }
+                cachedMessages = [];
             };
 
             ws.onclose = function(event) {
@@ -227,9 +232,14 @@ const smartsocket = (function () {
          *
          * @param data a text string, ArrayBuffer or Blob to send to the server.
          */
+        let cachedMessages = [];
         this.send = function(data) {
             if (ws) {
-                return ws.send(data);
+                if (self.readyState === WebSocket.OPEN) {
+                    return ws.send(data);
+                } else {
+                    cachedMessages.push(data);
+                }
             } else {
                 throw 'INVALID_STATE_ERR : Pausing to reconnect websocket';
             }

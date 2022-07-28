@@ -47,7 +47,16 @@ describe('Smartsocket', () => {
     });
 
     it('can send a message', async () => {
+        stubSocket.onopen();
         socket.send('foo');
+        expect(sentMessages).toEqual(['foo']);
+    });
+
+    it('caches outgoing messages until the websocket is connected', async () => {
+        socket.send('foo');
+        expect(sentMessages).toEqual([]);
+
+        stubSocket.onopen();
         expect(sentMessages).toEqual(['foo']);
     });
 
