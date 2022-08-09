@@ -16,6 +16,7 @@ const server = http.createServer(function (request, response) {
     switch (extname) {
         case '.js':
             contentType = 'text/javascript';
+            filePath = filePath.replace("./", "../src/");
             break;
         case '.css':
             contentType = 'text/css';
@@ -27,11 +28,10 @@ const server = http.createServer(function (request, response) {
 
     fs.readFile(filePath, function(error, content) {
         if (error) {
-            if(error.code === 'ENOENT'){
-                fs.readFile('./404.html', function(error, content) {
-                    response.writeHead(200, { 'Content-Type': contentType });
-                    response.end(content, 'utf-8');
-                });
+            if(error.code === 'ENOENT') {
+                response.writeHead(400, { 'Content-Type': contentType });
+                response.end('File not found at ' + filePath + "\n");
+                response.end(content, 'utf-8');
             }
             else {
                 response.writeHead(500);

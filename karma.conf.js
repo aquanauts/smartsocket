@@ -8,8 +8,8 @@ module.exports = function (config) {
     config.set({
         // list of files / patterns to load in the browser
         files: [
-            'src/*.js',
-            'spec/*.js'
+            {pattern: 'src/*.js', type: 'module', include: false},
+            {pattern: 'spec/*.js', type: 'module', include: true}
         ],
 
         frameworks: ['jasmine'],
