@@ -1,4 +1,5 @@
-export function createFakeBrowserWindow() {
+export function createFakeBrowserWindow(options) {
+    options = {autoOpenSockets: true, ...options}
     const listeners = {};
     const responses = {};
     const socketSequences = {};
@@ -82,32 +83,6 @@ export function createFakeBrowserWindow() {
         },
         WebSocket: StubSocket,
         sockets,
-        smartsocket: {
-            connect: (config) => {
-                function createFakeSocket(sequence) {
-                    const socket = {
-                        send: (message) => {
-                            let expectedMessage = sequence.shift();
-                            if (message in expectedMessage) {
-                                for (let dataMessage of expectedMessage[message]) {
-                                    socket.onmessage({data: dataMessage});
-                                }
-                            }
-                        }
-                    };
-                    return socket;
-                }
-
-                let unopenedSocket;
-                config.socketFn = (url, protocols) => {
-                    unopenedSocket = createFakeSocket(socketSequences[url])
-                    return unopenedSocket;
-                };
-                let ss = smartsocket.connect(config);
-                unopenedSocket.onopen();
-                return ss;
-            }
-        },
         addSocketSequence: (url, sequence) => {
             socketSequences[`ws://${window.location.host}${url}`] = sequence;
         },

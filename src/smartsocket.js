@@ -5,9 +5,7 @@ function createSocket(socket, config) {
     let snapshot = {};
     const updateCallbacks = {};
     updateCallbacks[ADD_TYPE] = [];
-    updateCallbacks[DELETE_TYPE] = [];
-    socket.onmessage = function (e) {
-        const event = config.parser(e.data);
+    updateCallbacks[DELETE_TYPE] = []; socket.onmessage = function (e) { const event = config.parser(e.data);
         if (event.type === ADD_TYPE) {
             snapshot[event.key] = event.value;
             for (let cb of updateCallbacks[event.type]) {
@@ -310,10 +308,12 @@ export function createContext(windowRef) {
         const [viewParams, viewFn] = parseRoute(routes);
         const view = viewFn(context, viewParams);
         viewContainer.replaceChildren(view);
+        // TODO Trigger an event after the view is updated
     }
 
     function connect(config) {
         windowRef = windowRef || window;
+        // TODO Not sure we need a function here
         const socketFn = config.socketFn || ((url, protocols) => new windowRef.WebSocket(url, protocols));
         const protocols = [];
         const options = {};
@@ -325,21 +325,28 @@ export function createContext(windowRef) {
         windowRef.addEventListener("hashchange", () => {
             showView(routes);
         });
-        // TODO Replace this with an event
-        // createNavbar();
         showView(routes);
     }
 
     const context = {
+        // TODO Untested
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
+        
+        // TODO Untested
         setInterval: (callback, interval) => windowRef.setInterval(callback, interval),
 
         // TODO Untested!
         setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
+
+        // TODO Untested
         getJSON,
+
         template,
         startRouter,
+
+        // TODO Untested
         nowMillis: () => windowRef.Date.now(),
+
         connect: (path, parser) => {
             parser = parser || JSON.parse;
             return connect({url:`ws://${windowRef.location.host}/${path}`, parser}, windowRef);
