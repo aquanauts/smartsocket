@@ -7,16 +7,15 @@ const path = require('path');
 let state = {};
 
 const server = http.createServer(function (request, response) {
-    let filePath = '.' + request.url;
-    if (filePath === './')
-        filePath = './index.html';
+    let filePath = './webroot' + request.url;
+    if (filePath === './webroot/')
+        filePath += 'index.html';
 
     let extname = path.extname(filePath);
     let contentType = 'text/html';
     switch (extname) {
         case '.js':
             contentType = 'text/javascript';
-            filePath = filePath.replace("./", "../src/");
             break;
         case '.css':
             contentType = 'text/css';

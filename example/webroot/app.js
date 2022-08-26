@@ -4,16 +4,16 @@ export function mainView(context, viewParams) {
     const socket = context.connect('ws');
 
     socket.onAdd((key, value) => {
-        let row = tbody.querySelector('#' + msg.key);
+        let row = tbody.querySelector('#' + key);
         if (row === null) {
             row = document.createElement('tr');
-            row.id = msg.key
+            row.id = key
             row.append(document.createElement('td'));
             row.append(document.createElement('td'));
             tbody.append(row);
         }
-        row.childNodes[0].innerText = msg.key;
-        row.childNodes[1].innerText = msg.value;
+        row.childNodes[0].innerText = key;
+        row.childNodes[1].innerText = value;
     })
 
     socket.onDelete((key) => {

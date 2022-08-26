@@ -1,15 +1,14 @@
-import {createFakeBrowserWindow} from "../src/support.js"
-import {createContext} from "../src/smartsocket.js"
-import {mainView} from "../src/example_app.js"
+import {createFakeBrowserWindow} from "../support.js"
+import {createContext} from "../smartsocket.js"
+import {mainView} from "../app.js"
 
 describe('Example application', () => {
     let templates, context, windowRef, markup;
 
     beforeAll(async () => {
-        const response = await fetch('/base/example/index.html')
+        const response = await fetch('/base/example/webroot/index.html')
         markup = await response.text()
-        const parser = new DOMParser()
-        const doc = parser.parseFromString(markup, 'text/html')
+        const doc = new DOMParser().parseFromString(markup, 'text/html')
         templates = doc.querySelector('template')
     });
 

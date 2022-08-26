@@ -8,9 +8,11 @@ module.exports = function (config) {
     config.set({
         // list of files / patterns to load in the browser
         files: [
-            {pattern: 'example/index.html', type: 'html', include: false},
             {pattern: 'src/*.js', type: 'module', include: false},
-            {pattern: 'spec/*.js', type: 'module', include: true}
+            {pattern: 'spec/*.js', type: 'module', include: true},
+            {pattern: 'example/webroot/index.html', type: 'html', include: false},
+            {pattern: 'example/webroot/*.js', type: 'module', include: false},
+            {pattern: 'example/webroot/spec/*.js', type: 'module', include: true}
         ],
 
         frameworks: ['jasmine'],
