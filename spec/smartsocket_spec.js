@@ -14,6 +14,18 @@ describe('Smartsocket', () => {
         expect(context.nowMillis()).toEqual(1234567890001);
     });
 
+    it('can fetch JSON documents', async () => {
+        const result = await context.getJSON('/some/url')
+        expect(result).toEqual();
+    });
+
+    it('raises an error if a request fails', async () => {
+        windowRef.fetch = (url) => Promise.reject("Error!")
+        const errors = [];
+        await context.getJSON('/some/url').catch((error) => errors.push(error))
+        expect(errors).toEqual(["Error!"])
+    });
+
     describe('templates', () => {
         it('should clone templates from the template element', function () {
             const templateElem = new DOMParser().parseFromString(`<template>

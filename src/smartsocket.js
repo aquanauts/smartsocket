@@ -289,9 +289,11 @@ export function createContext(windowRef) {
         return node.cloneNode(true);
     }
 
-    function getJSON(url) {
-        return new Promise((resolve) => {
-            windowRef.fetch(url).json().then(resolve(json));
+    function getJSON(url, options) {
+        return new Promise((resolve, reject) => {
+            windowRef.fetch(url, options).
+                then((response) => resolve(response.json())).
+                catch((error) => reject(error))
         });
     }
 
@@ -340,9 +342,7 @@ export function createContext(windowRef) {
         // TODO Untested!
         setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
 
-        // TODO Untested
         getJSON,
-
         template,
         startRouter,
         nowMillis: () => windowRef.Date.now(),
