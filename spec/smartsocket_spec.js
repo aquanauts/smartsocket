@@ -43,6 +43,13 @@ describe('Smartsocket', () => {
         expect(callback.calls.count()).toEqual(2);
     });
 
+    it('can subscribe to events', async () => {
+        const callback = jasmine.createSpy('callback')
+        context.addEventListener('click', callback)
+        windowRef.dispatchEvent(new Event('click'))
+        expect(callback).toHaveBeenCalled();
+    });
+
     describe('templates', () => {
         it('should clone templates from the template element', function () {
             const templateElem = new DOMParser().parseFromString(`<template>

@@ -333,9 +333,7 @@ export function createContext(windowRef) {
     }
 
     const context = {
-        // TODO Untested
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
-        
         setInterval: (callback, interval) => windowRef.setInterval(callback, interval),
         setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
         getJSON,
