@@ -1,3 +1,7 @@
+export function aboutView(context) {
+    return context.template('AboutView')
+}
+
 export function mainView(context, viewParams) {
     const view = context.template('MainView')
     const tbody = view.querySelector('tbody');
@@ -47,5 +51,6 @@ export function mainView(context, viewParams) {
 export const routes = {
     "": mainView,
     "#": mainView,
-    "#main": mainView
+    "#main": mainView,
+    "#about": aboutView
 };

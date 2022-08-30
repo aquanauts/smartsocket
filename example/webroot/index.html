@@ -39,12 +39,20 @@
           <button>Delete</button>
         </form>
       </div>
+
+      <div class="AboutView">
+        <h4>About</h4>
+        <p>This example uses incremental snapshots to update and store state</p>
+        <p>See the README for more details</p>
+      </div>
+
     </template>
 
     <script type="module">
       import {createContext} from "./smartsocket.js";
       import {routes} from "./app.js";
-      createContext().startRouter(routes, window.viewContainer);
+      const context = createContext()
+      context.startRouter(routes, window.viewContainer);
     </script>
   </body>
 </html>

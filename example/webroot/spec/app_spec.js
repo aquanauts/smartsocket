@@ -1,6 +1,6 @@
 import {createFakeBrowserWindow, fetchTemplates} from "./support.js"
 import {createContext} from "../smartsocket.js"
-import {mainView} from "../app.js"
+import {mainView, aboutView} from "../app.js"
 
 describe('Example application', () => {
     let templates, context, windowRef;
@@ -13,6 +13,11 @@ describe('Example application', () => {
         windowRef = createFakeBrowserWindow()
         windowRef.document.body.append(templates.cloneNode(true))
         context = createContext(windowRef)
+    });
+
+    it('has an about view', async () => {
+        const view = aboutView(context);
+        expect(view.innerHTML).toContain('About')
     });
 
     describe('main view', () => {
