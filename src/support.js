@@ -36,6 +36,7 @@ export function createFakeBrowserWindow(options) {
         }
         scheduledTimeouts[scheduleTime].push(callback);
     }
+
     return {
         addEventListener: (eventType, callback) => {
             if (!(eventType in listeners)) {
@@ -90,3 +91,9 @@ export function createFakeBrowserWindow(options) {
     };
 }
 
+export async function fetchTemplates(url) {
+    const response = await fetch('/base/example/webroot/index.html')
+    const markup = await response.text()
+    const doc = new DOMParser().parseFromString(markup, 'text/html')
+    return doc.querySelector('template')
+}
