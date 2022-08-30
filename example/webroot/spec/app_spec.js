@@ -12,7 +12,6 @@ describe('Example application', () => {
     beforeEach(async () => {
         windowRef = createFakeBrowserWindow()
         windowRef.document.body.append(templates.cloneNode(true))
-
         context = createContext(windowRef)
     });
 

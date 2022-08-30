@@ -26,6 +26,23 @@ describe('Smartsocket', () => {
         expect(errors).toEqual(["Error!"])
     });
 
+    it('can schedule a one shot timer', async () => {
+        const callback = jasmine.createSpy('callback')
+        context.setTimeout(callback, 1000);
+        windowRef.timePasses(1000)
+        expect(callback).toHaveBeenCalled();
+    });
+
+    it('can schedule an interval timer', async () => {
+        const callback = jasmine.createSpy('callback')
+        context.setInterval(callback, 1000);
+        windowRef.timePasses(1000)
+        expect(callback).toHaveBeenCalled();
+
+        windowRef.timePasses(1000)
+        expect(callback.calls.count()).toEqual(2);
+    });
+
     describe('templates', () => {
         it('should clone templates from the template element', function () {
             const templateElem = new DOMParser().parseFromString(`<template>

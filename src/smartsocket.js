@@ -336,12 +336,8 @@ export function createContext(windowRef) {
         // TODO Untested
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
         
-        // TODO Untested
         setInterval: (callback, interval) => windowRef.setInterval(callback, interval),
-
-        // TODO Untested!
         setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
-
         getJSON,
         template,
         startRouter,
