@@ -1,4 +1,4 @@
-import {createFakeBrowserWindow} from "../support.js"
+import {createFakeBrowserWindow} from "./support.js"
 import {createContext} from "../smartsocket.js"
 import {mainView} from "../app.js"
 
@@ -15,6 +15,7 @@ describe('Example application', () => {
     beforeEach(() => {
         windowRef = createFakeBrowserWindow()
         const templateContainer = windowRef.document.body.append(templates.cloneNode(true))
+
         context = createContext(windowRef)
     });
 

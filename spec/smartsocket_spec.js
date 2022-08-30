@@ -6,8 +6,12 @@ describe('Smartsocket', () => {
 
     beforeEach(() => {
         windowRef = createFakeBrowserWindow();
+        windowRef.timePasses(1234567890001);
         context = createContext(windowRef);
-        context.nowMillis = () => 1234567890000;
+    });
+
+    it('provides millisecond time', async () => {
+        expect(context.nowMillis()).toEqual(1234567890001);
     });
 
     describe('templates', () => {
@@ -100,23 +104,23 @@ describe('Smartsocket', () => {
         });
 
         it('loads the current view when the router is made ready', async () => {
-            context.startRouter(routes);
-            const view = windowRef.document.querySelector('.MainView');
+            const viewContainer = context.startRouter(routes);
+            const view = viewContainer.querySelector('.MainView');
             expect(view.innerHTML).toEqual("Hello");
         });
 
         it('switches to the new view when the hashchange event is triggered', async () => {
-            context.startRouter(routes);
+            const viewContainer = context.startRouter(routes);
             windowRef.location.hash = '#params';
             windowRef.dispatchEvent(new Event('hashchange'));
-            expect(windowRef.document.querySelector('.ParamView')).not.toBeNull();
-            expect(windowRef.document.querySelector('.MainView')).toBeNull();
+            expect(viewContainer.querySelector('.ParamView')).not.toBeNull();
+            expect(viewContainer.querySelector('.MainView')).toBeNull();
         });
 
         it('can parse routes with query parameters', async () => {
             windowRef.location.hash = '#params?key1=value1&key2=value2';
-            context.startRouter(routes);
-            const view = windowRef.document.querySelector('.ParamView');
+            const viewContainer = context.startRouter(routes);
+            const view = viewContainer.querySelector('.ParamView');
             expect(view.getAttribute('key1')).toEqual('value1');
             expect(view.getAttribute('key2')).toEqual('value2');
         });

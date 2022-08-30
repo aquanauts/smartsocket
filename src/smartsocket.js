@@ -279,8 +279,6 @@ ReconnectingSmartSocket.CLOSED = WebSocket.CLOSED;
 
 export function createContext(windowRef) {
     windowRef = windowRef || window;
-    const viewContainer = windowRef.document.createElement('div');
-    windowRef.document.body.append(viewContainer);
 
     function template(name) {
         const templates = windowRef.document.querySelector('template').content;
@@ -304,7 +302,7 @@ export function createContext(windowRef) {
         return [new URLSearchParams(hash.split('?')[1]), viewFn];
     }
 
-    function showView(routes) {
+    function showView(routes, viewContainer) {
         const [viewParams, viewFn] = parseRoute(routes);
         const view = viewFn(context, viewParams);
         viewContainer.replaceChildren(view);
@@ -321,11 +319,15 @@ export function createContext(windowRef) {
         return createSocket(socket, config);
     }
 
-    function startRouter(routes) {
+    function startRouter(routes, viewContainer) {
+        viewContainer = viewContainer || windowRef.document.createElement('div');
+        windowRef.document.body.append(viewContainer);
+
         windowRef.addEventListener("hashchange", () => {
-            showView(routes);
+            showView(routes, viewContainer);
         });
-        showView(routes);
+        showView(routes, viewContainer);
+        return viewContainer;
     }
 
     const context = {
@@ -343,10 +345,7 @@ export function createContext(windowRef) {
 
         template,
         startRouter,
-
-        // TODO Untested
         nowMillis: () => windowRef.Date.now(),
-
         connect: (path, parser) => {
             parser = parser || JSON.parse;
             return connect({url:`ws://${windowRef.location.host}/${path}`, parser}, windowRef);

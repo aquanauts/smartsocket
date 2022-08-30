@@ -7,6 +7,7 @@
   <body>
     <h1>Smartsocket Example</h1>
     <hr>
+    <div id='viewContainer'></div>
 
     <template>
       <div class="MainView">
@@ -43,7 +44,7 @@
     <script type="module">
       import {createContext} from "./smartsocket.js";
       import {routes} from "./app.js";
-      createContext().startRouter(routes);
+      createContext().startRouter(routes, window.viewContainer);
     </script>
   </body>
 </html>
