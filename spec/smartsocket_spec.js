@@ -160,6 +160,15 @@ describe('Smartsocket', () => {
             expect(view.getAttribute('key1')).toEqual('value1');
             expect(view.getAttribute('key2')).toEqual('value2');
         });
+
+        it('triggers an event after the view changes', async () => {
+            const callback = jasmine.createSpy('callback')
+            const viewContainer = context.startRouter(routes)
+            context.addEventListener('smartsocket.viewChange', callback)
+            windowRef.location.hash = '#params';
+            windowRef.dispatchEvent(new Event('hashchange'));
+            expect(callback).toHaveBeenCalled();
+        });
     });
 })
 

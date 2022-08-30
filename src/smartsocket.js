@@ -308,7 +308,7 @@ export function createContext(windowRef) {
         const [viewParams, viewFn] = parseRoute(routes);
         const view = viewFn(context, viewParams);
         viewContainer.replaceChildren(view);
-        // TODO Trigger an event after the view is updated
+        windowRef.dispatchEvent(new CustomEvent('smartsocket.viewChange'));
     }
 
     function connect(config) {
