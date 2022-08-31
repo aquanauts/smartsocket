@@ -28,8 +28,7 @@ export function mainView(context, viewParams) {
     addForm.onsubmit = function () {
         const keyElem = addForm.querySelector('#keyInput')
         const valueElem = addForm.querySelector('#valueInput')
-        // TODO Send an object here, not a string
-        socket.send(JSON.stringify({type:"a", key: keyElem.value, value: valueElem.value}));
+        socket.sendJSON({type:"a", key: keyElem.value, value: valueElem.value});
         keyElem.value = ""
         valueElem.value = ""
         keyElem.focus()
@@ -39,8 +38,7 @@ export function mainView(context, viewParams) {
     const deleteForm = view.querySelector('.DeleteForm')
     deleteForm.onsubmit = function () {
         const deleteElem = deleteForm.querySelector('#DeleteInput')
-        // TODO Send an object here, not a string
-        socket.send(JSON.stringify({type:"d", key: deleteElem.value}));
+        socket.sendJSON({type:"d", key: deleteElem.value});
         deleteElem.value = ""
         deleteElem.focus()
         return false;

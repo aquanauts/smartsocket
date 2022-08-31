@@ -97,10 +97,16 @@ describe('Smartsocket', () => {
             expect(deletes).toEqual([['users-brady-name']]);
         });
 
-        it('can send a message', async () => {
+        it('can send a raw message', async () => {
             rawSocket.onopen();
             socket.send('foo');
             expect(rawSocket.sentMessages).toEqual(['foo']);
+        });
+
+        it('can send a JSON message', async () => {
+            rawSocket.onopen();
+            socket.sendJSON({foo: "bar"});
+            expect(rawSocket.sentMessages).toEqual(['{"foo":"bar"}']);
         });
 
         it('caches outgoing messages until the websocket is connected', async () => {

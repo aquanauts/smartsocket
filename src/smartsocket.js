@@ -2,18 +2,20 @@ export const ADD_TYPE = "a"
 export const DELETE_TYPE = "d"
 
 function createSocket(socket, config) {
-    let snapshot = {};
+    let memo = {};
     const updateCallbacks = {};
     updateCallbacks[ADD_TYPE] = [];
-    updateCallbacks[DELETE_TYPE] = []; socket.onmessage = function (e) { const event = config.parser(e.data);
+    updateCallbacks[DELETE_TYPE] = []; 
+    socket.onmessage = function (e) { 
+        const event = JSON.parse(e.data);
         if (event.type === ADD_TYPE) {
-            snapshot[event.key] = event.value;
+            memo[event.key] = event.value;
             for (let cb of updateCallbacks[event.type]) {
                 cb(event.key, event.value);
             }
         }
         if (event.type === DELETE_TYPE) {
-            delete snapshot[event.key];
+            delete memo[event.key];
             for (let cb of updateCallbacks[event.type]) {
                 cb(event.key);
             }
@@ -21,15 +23,20 @@ function createSocket(socket, config) {
     }
 
     socket.onopen = () => {
-        snapshot = {};
+        memo = {};
     }
 
     function state() {
-        return snapshot;
+        return memo;
+    }
+
+    function sendJSON(message) {
+        socket.send(JSON.stringify(message))
     }
 
     return {
         state,
+        sendJSON,
         send: function(message) {
             socket.send(message);
         },
@@ -341,9 +348,8 @@ export function createContext(windowRef) {
         template,
         startRouter,
         nowMillis: () => windowRef.Date.now(),
-        connect: (path, parser) => {
-            parser = parser || JSON.parse;
-            return connect({url:`ws://${windowRef.location.host}/${path}`, parser}, windowRef);
+        connect: (path) => {
+            return connect({url:`ws://${windowRef.location.host}/${path}`}, windowRef);
         },
     }
 
