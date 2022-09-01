@@ -15,8 +15,9 @@ describe('Smartsocket', () => {
     })
 
     it('can fetch JSON documents', async () => {
+        windowRef.setResponse('/some/url', JSON.stringify({one: 2}))
         const result = await context.getJSON('/some/url')
-        expect(result).toEqual()
+        expect(result).toEqual({one: 2})
     })
 
     it('raises an error if a request fails', async () => {
@@ -125,8 +126,10 @@ describe('Smartsocket', () => {
     })
 
     describe('router', () => {
-        let routes
+        let routes, viewContainer
         beforeEach(function () {
+            viewContainer = windowRef.document.createElement('div')
+            windowRef.document.body.append(viewContainer)
             routes = {
                 "#view": () => {
                     const view = windowRef.document.createElement('div')
@@ -141,18 +144,23 @@ describe('Smartsocket', () => {
                         view.setAttribute(key, value)
                     }
                     return view
+                },
+                "#async": async () => {
+                    const view = windowRef.document.createElement('div')
+                    view.className = 'AsyncView'
+                    return view
                 }
             }
         })
 
         it('loads the current view when the router is made ready', async () => {
-            const viewContainer = context.startRouter(routes)
+            context.startRouter(routes, viewContainer)
             const view = viewContainer.querySelector('.MainView')
             expect(view.innerHTML).toEqual("Hello")
         })
 
         it('switches to the new view when the hashchange event is triggered', async () => {
-            const viewContainer = context.startRouter(routes)
+            context.startRouter(routes, viewContainer)
             windowRef.location.hash = '#params'
             windowRef.dispatchEvent(new Event('hashchange'))
             expect(viewContainer.querySelector('.ParamView')).not.toBeNull()
@@ -161,7 +169,7 @@ describe('Smartsocket', () => {
 
         it('can parse routes with query parameters', async () => {
             windowRef.location.hash = '#params?key1=value1&key2=value2'
-            const viewContainer = context.startRouter(routes)
+            context.startRouter(routes, viewContainer)
             const view = viewContainer.querySelector('.ParamView')
             expect(view.getAttribute('key1')).toEqual('value1')
             expect(view.getAttribute('key2')).toEqual('value2')
@@ -169,11 +177,18 @@ describe('Smartsocket', () => {
 
         it('triggers an event after the view changes', async () => {
             const callback = jasmine.createSpy('callback')
-            const viewContainer = context.startRouter(routes)
+            context.startRouter(routes, viewContainer)
             context.addEventListener('smartsocket.viewChange', callback)
             windowRef.location.hash = '#params'
             windowRef.dispatchEvent(new Event('hashchange'))
             expect(callback).toHaveBeenCalled()
+        })
+
+        it('can use async view functions', async () => {
+            windowRef.location.hash = '#async'
+            await context.startRouter(routes, viewContainer)
+            const view = viewContainer.querySelector('.AsyncView')
+            expect(view).not.toBeNull()
         })
     })
 })

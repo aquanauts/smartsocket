@@ -21,7 +21,7 @@ describe('fake browser', () => {
     it('returns expected responses from fetch', async () => {
         let called = false
         const expectedResponse = {myResponse: true}
-        windowRef.setResponse('/myURL', expectedResponse)
+        windowRef.setResponse('/myURL', JSON.stringify(expectedResponse))
         await windowRef.fetch('/myURL').then((response) => {
             response.json().then((jsonResponse) => {
                 expect(jsonResponse).toEqual(expectedResponse)

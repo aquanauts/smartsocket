@@ -27,8 +27,8 @@ export function createFakeBrowserWindow(options) {
         }
     }
 
-    function setResponse(url, jsonObject) {
-        responses[url] = jsonObject
+    function setResponse(url, responseBody) {
+        responses[url] = responseBody
     }
 
     function fakeSetTimeout(callback, interval) {
@@ -77,7 +77,12 @@ export function createFakeBrowserWindow(options) {
         fetch: (url) => {
             return Promise.resolve({
                 json: () => {
-                    return Promise.resolve(responses[url])
+                    if (url in responses) {
+                        return Promise.resolve(JSON.parse(responses[url]))
+                    } else {
+                        // TODO Untested
+                        return Promise.reject("No response set for url: " + url)
+                    }
                 }
             })
         },

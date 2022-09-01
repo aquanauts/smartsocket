@@ -1,6 +1,6 @@
 import {createFakeBrowserWindow, fetchTemplates} from "./support.js"
 import {createContext} from "../smartsocket.js"
-import {mainView, aboutView, ADD_TYPE, DELETE_TYPE} from "../app.js"
+import {mainView, aboutView, jsonView, ADD_TYPE, DELETE_TYPE} from "../app.js"
 
 describe('Example application', () => {
     let templates, context, windowRef
@@ -62,4 +62,22 @@ describe('Example application', () => {
             expect(tbody.querySelector('tr')).toBeNull()
         })
     })
+
+    describe('JSON view', () => {
+        let view
+
+        beforeEach(async () => {
+            windowRef.setResponse('/state.json', JSON.stringify({
+                foo: "bar"
+            }))
+            view = await jsonView(context)
+        });
+
+        it('displays the current state', async () => {
+            const tbody = view.querySelector('.StateTable tbody')
+            const row = tbody.querySelector('tr')
+            expect(row.querySelector('td.Key').textContent).toEqual("foo")
+            expect(row.querySelector('td.Value').textContent).toEqual("bar")
+        });
+    });
 })

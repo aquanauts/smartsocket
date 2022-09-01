@@ -315,9 +315,14 @@ export function createContext(windowRef) {
         return [new URLSearchParams(hash.split('?')[1]), viewFn]
     }
 
-    function showView(routes, viewContainer) {
+    async function showView(routes, viewContainer) {
         const [viewParams, viewFn] = parseRoute(routes)
-        const view = viewFn(context, viewParams)
+        let view
+        if (viewFn.constructor.name === 'AsyncFunction') {
+            view = await viewFn(context, viewParams)
+        } else {
+            view = viewFn(context, viewParams)
+        }
         viewContainer.replaceChildren(view)
         windowRef.dispatchEvent(new CustomEvent('smartsocket.viewChange'))
     }
@@ -333,14 +338,10 @@ export function createContext(windowRef) {
     }
 
     function startRouter(routes, viewContainer) {
-        viewContainer = viewContainer || windowRef.document.createElement('div')
-        windowRef.document.body.append(viewContainer)
-
-        windowRef.addEventListener("hashchange", () => {
-            showView(routes, viewContainer)
+        windowRef.addEventListener("hashchange", async () => {
+            await showView(routes, viewContainer)
         })
-        showView(routes, viewContainer)
-        return viewContainer
+        return showView(routes, viewContainer)
     }
 
     const context = {

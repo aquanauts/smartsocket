@@ -7,6 +7,11 @@ const path = require('path');
 let state = {};
 
 const server = http.createServer(function (request, response) {
+    if (request.url == '/state.json') {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify(state));
+    }
+
     let filePath = './webroot' + request.url;
     if (filePath === './webroot/')
         filePath += 'index.html';

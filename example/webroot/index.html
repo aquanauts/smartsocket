@@ -5,13 +5,26 @@
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   </head>
   <body>
-    <h1>Smartsocket Example</h1>
+    <h1>Smartsocket Examples</h1>
     <hr>
     <div id='viewContainer'></div>
 
     <template>
+      <table id='table' border="1" class='StateTable'>
+        <thead>
+        <tr>
+          <th>Keys</th>
+          <th>Values</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
       <table>
         <tbody>
+          <!-- You have to enclose a <tr> in a table body 
+            or some browsers will drop it from the markup when it's parsed-->
           <tr class='StateRow'>
             <td class='Key'></td>
             <td class='Value'></td>
@@ -19,18 +32,15 @@
         </tbody>
       </table>
 
+
       <div class="MainView">
+        <h2>Socket State</h2>
+
+        <p>Uses a WebSocket to send and receive incremental state updates</p>
         <h4>Current State</h4>
-        <table id='table' border="1" class='StateTable'>
-          <thead>
-          <tr>
-            <th>Keys</th>
-            <th>Values</th>
-          </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
+        <div class="TableContainer">
+        </div>
+        
         <hr>
         <h4>Add State</h4>
         <form class="AddForm">
@@ -50,9 +60,16 @@
       </div>
 
       <div class="AboutView">
-        <h4>About</h4>
-        <p>This example uses incremental snapshots to update and store state</p>
-        <p>See the README for more details</p>
+        <h2>About</h2>
+        <p>A simple page with static text</p>
+      </div>
+
+      <div class="JsonView">
+        <h2>JSON View</h2>
+        <p>Requests an application state snapshot via a GET request rather than a WebSocket</p>
+        <h4>State Snapshot</h4>
+        <div class="TableContainer">
+        </div>
       </div>
 
     </template>

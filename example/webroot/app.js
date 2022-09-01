@@ -5,7 +5,7 @@ export function aboutView(context) {
     return context.template('AboutView')
 }
 
-export function mainView(context, viewParams) {
+export function mainView(context) {
     function addKey(key, value) {
         let row = rows[key]
         if (!row) {
@@ -36,8 +36,11 @@ export function mainView(context, viewParams) {
 
     const rows = {}
     const view = context.template('MainView')
-    const tbody = view.querySelector('.StateTable tbody')
+    const table = context.template('StateTable')
+    const tbody = table.querySelector('tbody')
     const socket = context.connect('ws', {memoizer})
+
+    view.querySelector('.TableContainer').append(table)
 
     const addForm = view.querySelector('.AddForm')
     addForm.onsubmit = function () {
@@ -61,7 +64,24 @@ export function mainView(context, viewParams) {
     return view
 }
 
-// TODO getJSON example
+export async function jsonView(context) {
+    const view = context.template('JsonView')
+    const state = await context.getJSON('/state.json')
+    const container = view.querySelector('.TableContainer')
+    const table = context.template('StateTable')
+    const tbody = table.querySelector('tbody');
+    for(let [key, value] of Object.entries(state)) {
+        const row = context.template('StateRow')
+        row.querySelector('.Key').textContent = key
+        row.querySelector('.Value').textContent = value
+        tbody.append(row)
+    }
+    container.innerHTML = ''
+    container.append(table)
+    return view
+}
+
+// TODO View parameters
 // TODO Timer example
 // TODO Interval / nowMillis clock example
 // TODO Event listener example (navbar)
@@ -70,5 +90,6 @@ export const routes = {
     "": mainView,
     "#": mainView,
     "#main": mainView,
+    "#json": jsonView,
     "#about": aboutView
 }
