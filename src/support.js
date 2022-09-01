@@ -1,69 +1,71 @@
 export function createFakeBrowserWindow(options) {
-    options = {autoOpenSockets: true, ...options}
-    const listeners = {};
-    const responses = {};
-    const socketSequences = {};
-    const scheduledTimeouts = {};
-    const sockets = {};
-    let currTime = 0;
-    const fakeDocument = new Document();
+    const listeners = {}
+    const responses = {}
+    const socketSequences = {}
+    const scheduledTimeouts = {}
+    const sockets = {}
+    let currTime = 0
+    const fakeDocument = new Document()
     const body = fakeDocument.createElementNS("http://www.w3.org/1999/xhtml", "body")
-    const html = fakeDocument.createElementNS("http://www.w3.org/1999/xhtml", "html");
-    html.appendChild(fakeDocument.createElementNS("http://www.w3.org/1999/xhtml", "head"));
-    html.appendChild(body);
-    fakeDocument.appendChild(html);
-    fakeDocument.body = body;
+    const html = fakeDocument.createElementNS("http://www.w3.org/1999/xhtml", "html")
+    html.appendChild(fakeDocument.createElementNS("http://www.w3.org/1999/xhtml", "head"))
+    html.appendChild(body)
+    fakeDocument.appendChild(html)
+    fakeDocument.body = body
 
     class StubSocket {
         constructor(url) {
-            this.url = url;
-            this.sentMessages = [];
-            sockets[url] = this;
+            this.url = url
+            this.sentMessages = []
+            sockets[url] = this
         }
         send(msg) {
             this.sentMessages.push(msg)
         }
+        deliver(msg) {
+            this.onmessage({data: msg})
+        }
     }
 
     function setResponse(url, jsonObject) {
-        responses[url] = jsonObject;
+        responses[url] = jsonObject
     }
 
     function fakeSetTimeout(callback, interval) {
-        const scheduleTime = interval + currTime;
+        const scheduleTime = interval + currTime
         if (!(scheduleTime in scheduledTimeouts)) {
-            scheduledTimeouts[scheduleTime] = [];
+            scheduledTimeouts[scheduleTime] = []
         }
-        scheduledTimeouts[scheduleTime].push(callback);
+        scheduledTimeouts[scheduleTime].push(callback)
     }
 
     return {
         addEventListener: (eventType, callback) => {
             if (!(eventType in listeners)) {
-                listeners[eventType] = [];
+                listeners[eventType] = []
             }
-            listeners[eventType].push(callback);
+            listeners[eventType].push(callback)
         },
         dispatchEvent: (event) => {
             for(let listener of listeners[event.type] || []) {
-                listener(event);
+                listener(event)
             }
         },
         setInterval: (callback, interval) => {
             fakeSetTimeout(() => {
-                callback();
-                fakeSetTimeout(callback, interval);
-            }, interval);
+                callback()
+                fakeSetTimeout(callback, interval)
+            }, interval)
         },
         setTimeout: fakeSetTimeout,
         timePasses: (interval) => {
-            currTime += interval;
+            currTime += interval
             for (let [scheduleTime, callbacks] of Object.entries(scheduledTimeouts)) {
                 if (scheduleTime <= currTime) {
                     for(let callback of callbacks) {
-                        callback();
+                        callback()
                     }
-                    delete scheduledTimeouts[scheduleTime];
+                    delete scheduledTimeouts[scheduleTime]
                 }
             }
         },
@@ -75,9 +77,9 @@ export function createFakeBrowserWindow(options) {
         fetch: (url) => {
             return Promise.resolve({
                 json: () => {
-                    return Promise.resolve(responses[url]);
+                    return Promise.resolve(responses[url])
                 }
-            });
+            })
         },
         Date: {
             now: () => currTime
@@ -85,10 +87,10 @@ export function createFakeBrowserWindow(options) {
         WebSocket: StubSocket,
         sockets,
         addSocketSequence: (url, sequence) => {
-            socketSequences[`ws://${window.location.host}${url}`] = sequence;
+            socketSequences[`ws://${window.location.host}${url}`] = sequence
         },
         setResponse
-    };
+    }
 }
 
 export async function fetchTemplates(url) {
