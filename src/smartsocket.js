@@ -2,7 +2,7 @@ export const ADD_TYPE = "a"
 export const DELETE_TYPE = "d"
 
 export const events = {
-    viewChanged: () => new CustomEvent('smartsocket.viewChange')
+    viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
 
 function createSocket(socket, config) {
@@ -15,6 +15,7 @@ function createSocket(socket, config) {
         if (config.memoizer) {
             config.memoizer(memo, event)
         }
+        // TODO Remove these callbacks
         if (event.type === ADD_TYPE) {
             memo[event.key] = event.value
             for (let cb of updateCallbacks[event.type]) {
@@ -61,7 +62,7 @@ function createSocket(socket, config) {
 export function createContext(windowRef) {
     windowRef = windowRef || window
 
-    function ReconnectingSmartSocket(url, protocols, options, socketFn) {
+    function ReconnectingSmartSocket(url, protocols, options) {
         let settings = {
             /** Whether or not the websocket should attempt to connect immediately upon instantiation. */
             automaticOpen: true,
@@ -157,7 +158,7 @@ export function createContext(windowRef) {
         }
 
         this.open = function (reconnectAttempt) {
-            ws = socketFn(self.url, protocols || [])
+            ws = new windowRef.WebSocket(self.url, protocols || [])
             ws.binaryType = this.binaryType
 
             if (reconnectAttempt) {
@@ -170,7 +171,7 @@ export function createContext(windowRef) {
             }
 
             let localWs = ws
-            let timeout = setTimeout(function() {
+            let timeout = windowRef.setTimeout(function() {
                 timedOut = true
                 localWs.close()
                 timedOut = false
@@ -210,7 +211,7 @@ export function createContext(windowRef) {
                     }
 
                     let timeout = self.reconnectInterval * Math.pow(self.reconnectDecay, self.reconnectAttempts)
-                    setTimeout(function() {
+                    windowRef.setTimeout(function() {
                         self.reconnectAttempts++
                         self.open(true)
                     }, timeout > self.maxReconnectInterval ? self.maxReconnectInterval : timeout)
@@ -334,11 +335,9 @@ export function createContext(windowRef) {
 
     function connect(config) {
         windowRef = windowRef || window
-        // TODO Not sure we need a function here
-        const socketFn = config.socketFn || ((url, protocols) => new windowRef.WebSocket(url, protocols))
         const protocols = []
         const options = {}
-        const socket = new ReconnectingSmartSocket(config.url, protocols, options, socketFn)
+        const socket = new ReconnectingSmartSocket(config.url, protocols, options)
         return createSocket(socket, config)
     }
 

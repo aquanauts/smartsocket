@@ -29,7 +29,7 @@ describe('Example application', () => {
         it('selects the current view in the navbar when it changes', async () => {
             expect(shell.querySelector('.navbar a[href="#main"]')).toHaveClass('selected')
             windowRef.location.hash = '#json'
-            windowRef.dispatchEvent(events.viewChanged())
+            windowRef.dispatchEvent(events.viewChange())
             expect(shell.querySelector('.navbar a[href="#main"]')).not.toHaveClass('selected')
             expect(shell.querySelector('.navbar a[href="#json"]')).toHaveClass('selected')
         });
