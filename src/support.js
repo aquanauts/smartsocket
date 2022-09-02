@@ -75,16 +75,13 @@ export function createFakeBrowserWindow(options) {
         },
         document: fakeDocument,
         fetch: (url) => {
-            return Promise.resolve({
-                json: () => {
-                    if (url in responses) {
-                        return Promise.resolve(JSON.parse(responses[url]))
-                    } else {
-                        // TODO Untested
-                        return Promise.reject("No response set for url: " + url)
-                    }
-                }
-            })
+            if (url in responses) {
+                return Promise.resolve({
+                    json: () => Promise.resolve(JSON.parse(responses[url]))
+                })
+            } else {
+                return Promise.reject("No response set for url: " + url)
+            }
         },
         Date: {
             now: () => currTime

@@ -31,6 +31,12 @@ describe('fake browser', () => {
         expect(called).toBeTrue()
     })
 
+    it('returns an error for unknown fetch URLs', async () => {
+        let error
+        await windowRef.fetch('/unknown').catch((e) => {error = e})
+        expect(error).toEqual("No response set for url: /unknown")
+    });
+
     it('can trigger scheduled tasks', async () => {
         const callback = jasmine.createSpy('callback')
         const callback2 = jasmine.createSpy('callback2')

@@ -94,7 +94,6 @@ export async function jsonView(context) {
 // TODO View parameters
 // TODO Timer example
 // TODO Interval / nowMillis clock example
-// TODO Event listener example (navbar)
 
 export const routes = {
     "": mainView,
