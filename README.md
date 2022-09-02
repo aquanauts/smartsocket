@@ -13,6 +13,10 @@ A common technique in the finance industry is to record application state as a s
 
 Like many single page applications, Smartsocket keeps track of view state by changing the URL hash. This allows the application to switch from one "page" to another without reloading. This not only makes for a smoother user experience, but also makes it easy to persist and cache data between page transitions.
 
+### Custom Events
+
+TODO
+
 ### HTML Templating
 
 Smartsocket uses the web standard [<template>]() element for HTML templating, allowing you to build simple web applications without any external dependencies.
@@ -22,6 +26,8 @@ Smartsocket uses the web standard [<template>]() element for HTML templating, al
 We believe that you should be able to create [fast, informative, and reliable automated tests](https://www.benrady.com/2016/11/testing-with-fire.html) for every aspect of your web application. Smartsocket is designed with that goal in mind. It provides a fake `window` implementation that, while not a comprehensive impelemention of the [web standard](https://developer.mozilla.org/en-US/docs/Web/API/Window), is sufficient to control every aspect of browser behavior that you need to test an application built with Smartsocket.
 
 ## What's Not Included
+
+Here are some things you you might expect to have in a "web framework". Smartsocket doesn't have these.
 
 * Data binding
 * A virtual DOM
