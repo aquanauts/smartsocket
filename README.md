@@ -19,7 +19,7 @@ TODO
 
 ### HTML Templating
 
-Smartsocket uses the web standard [<template>]() element for HTML templating, allowing you to build simple web applications without any external dependencies.
+Smartsocket uses the web standard [<template>](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) element for HTML templating, allowing you to build simple web applications without any external dependencies.
 
 ### Test-First Design
 
