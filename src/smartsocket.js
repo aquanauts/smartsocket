@@ -1,6 +1,10 @@
 export const ADD_TYPE = "a"
 export const DELETE_TYPE = "d"
 
+export const events = {
+    viewChanged: () => new CustomEvent('smartsocket.viewChange')
+}
+
 function createSocket(socket, config) {
     let memo = {}
     const updateCallbacks = {}
@@ -293,6 +297,7 @@ export function createContext(windowRef) {
 
     function template(name) {
         const templates = windowRef.document.querySelector('template').content
+        // TODO Be a little more defensive here in case there are colliding names
         const node = templates.querySelector("." + name)
         if (node === null) {
             throw new Error(`Could not find a node with class '${name}' in the <template> element`)
@@ -310,7 +315,7 @@ export function createContext(windowRef) {
 
     function parseRoute(routes) {
         const hash = windowRef.location.hash
-        const viewName = hash.split('?')[0]
+        const viewName = currentView()
         const viewFn = routes[viewName]
         return [new URLSearchParams(hash.split('?')[1]), viewFn]
     }
@@ -344,6 +349,10 @@ export function createContext(windowRef) {
         return showView(routes, viewContainer)
     }
 
+    function currentView() {
+        return windowRef.location.hash.split('?')[0]
+    }
+
     const context = {
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
         setInterval: (callback, interval) => windowRef.setInterval(callback, interval),
@@ -351,6 +360,7 @@ export function createContext(windowRef) {
         getJSON,
         template,
         startRouter,
+        currentView,
         nowMillis: () => windowRef.Date.now(),
         connect: (path, options) => {
             return connect({url:`ws://${windowRef.location.host}/${path}`, ...options}, windowRef)

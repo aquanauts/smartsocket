@@ -3,13 +3,30 @@
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <style type="text/css">
+      .navbar a {
+        margin-right: 20px;
+      }
+      .navbar a:not(.selected) {
+        text-decoration: none;
+      }
+    </style>
   </head>
   <body>
-    <h1>Smartsocket Examples</h1>
-    <hr>
-    <div id='viewContainer'></div>
-
     <template>
+      <div class="shell">
+        <div class="header">
+          <h1>Smartsocket Examples</h1>
+          <div class="navbar">
+            <a href="#main" class='selected'>Socket View</a>
+            <a href="#json">JSON View</a>
+            <a href="#about">About View</a>
+          </div>
+        </div>
+        <hr>
+        <div class='viewContainer'></div>
+      </div>
+
       <table id='table' border="1" class='StateTable'>
         <thead>
         <tr>
@@ -66,7 +83,7 @@
 
       <div class="JsonView">
         <h2>JSON View</h2>
-        <p>Requests an application state snapshot via a GET request rather than a WebSocket</p>
+        <p>Gets the application state as a complete JSON document via a GET request</p>
         <h4>State Snapshot</h4>
         <div class="TableContainer">
         </div>
@@ -76,9 +93,11 @@
 
     <script type="module">
       import {createContext} from "./smartsocket.js";
-      import {routes} from "./app.js";
+      import {routes, initShell} from "./app.js";
       const context = createContext()
-      context.startRouter(routes, window.viewContainer);
+      const shell = initShell(context)
+      window.document.body.prepend(shell)
+      context.startRouter(routes, shell.querySelector('.viewContainer'))
     </script>
   </body>
 </html>

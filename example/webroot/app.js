@@ -1,6 +1,16 @@
 export const ADD_TYPE = "a"
 export const DELETE_TYPE = "d"
 
+export function initShell(context) {
+    const shell = context.template('shell')
+    const navbar = shell.querySelector('.navbar')
+    context.addEventListener('smartsocket.viewChange', (e) => {
+        navbar.querySelector('a.selected').classList.remove('selected');
+        navbar.querySelector(`a[href="${context.currentView()}"]`).classList.add('selected')
+    })
+    return shell
+}
+
 export function aboutView(context) {
     return context.template('AboutView')
 }

@@ -1,6 +1,6 @@
 import {createFakeBrowserWindow, fetchTemplates} from "./support.js"
-import {createContext} from "../smartsocket.js"
-import {mainView, aboutView, jsonView, ADD_TYPE, DELETE_TYPE} from "../app.js"
+import {createContext, events} from "../smartsocket.js"
+import {initShell, mainView, aboutView, jsonView, ADD_TYPE, DELETE_TYPE} from "../app.js"
 
 describe('Example application', () => {
     let templates, context, windowRef
@@ -19,6 +19,21 @@ describe('Example application', () => {
         const view = aboutView(context)
         expect(view.innerHTML).toContain('About')
     })
+
+    describe('shell', () => {
+        let shell
+        beforeEach(() => {
+            shell = initShell(context)
+        });
+
+        it('selects the current view in the navbar when it changes', async () => {
+            expect(shell.querySelector('.navbar a[href="#main"]')).toHaveClass('selected')
+            windowRef.location.hash = '#json'
+            windowRef.dispatchEvent(events.viewChanged())
+            expect(shell.querySelector('.navbar a[href="#main"]')).not.toHaveClass('selected')
+            expect(shell.querySelector('.navbar a[href="#json"]')).toHaveClass('selected')
+        });
+    });
 
     describe('main view', () => {
         let view, socket
