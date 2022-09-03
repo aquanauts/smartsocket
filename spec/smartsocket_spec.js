@@ -61,41 +61,25 @@ describe('Smartsocket', () => {
         })
     })
 
-    describe('smart socket', () => {
+    describe('smart socket with a memoizer', () => {
         let socket, rawSocket
-
         beforeEach(() => {
-            socket = context.connect("ws")
+            socket = context.connect("ws", {memoizer: (memo, message) => {  
+                for (let [key, value] of Object.entries(message)) {
+                    memo[key] = value
+                }
+            }})
             rawSocket = windowRef.sockets[`ws://${windowRef.location.host}/ws`]
-        })
+            rawSocket.onopen()
+        });
 
-        function sendEvent(event) {
+        function receiveEvent(event) {
             rawSocket.onmessage({data: JSON.stringify(event)})
         }
 
-        it('adds to the socket state', async () => {
-            sendEvent({type: "a", key: "users-brady-name", value: "Ben Rady"})
-            expect(socket.state()).toEqual({"users-brady-name": "Ben Rady"})
-        })
-
-        it('deletes from the socket state', async () => {
-            sendEvent({type: "a", key: "users-brady-name", value: "Ben Rady"})
-            sendEvent({type: "d", key: "users-brady-name"})
-            expect(socket.state()).toEqual({})
-        })
-
-        it('calls back when a key is added', async () => {
-            const adds = []
-            socket.onAdd((...args) => adds.push(args))
-            sendEvent({type: "a", key: "users-brady-name", value: "Ben Rady"})
-            expect(adds).toEqual([['users-brady-name', 'Ben Rady']])
-        })
-
-        it('calls back when a key is deleted', async () => {
-            const deletes = []
-            socket.onDelete((...args) => deletes.push(args))
-            sendEvent({type: "d", key: "users-brady-name"})
-            expect(deletes).toEqual([['users-brady-name']])
+        it('creates a state snapshot', async () => {
+            receiveEvent({name: "Ben Rady"})
+            expect(socket.state()).toEqual({name: "Ben Rady"})
         })
 
         it('can send a raw message', async () => {
@@ -110,18 +94,39 @@ describe('Smartsocket', () => {
             expect(rawSocket.sentMessages).toEqual(['{"foo":"bar"}'])
         })
 
+        it('clears out the state when reconnecting', async () => {
+            receiveEvent({type: "a", key: "users-brady-name", value: "Ben Rady"})
+            rawSocket.onopen()
+            expect(socket.state()).toEqual({})
+        })
+    });
+
+    describe('smart socket', () => {
+        let socket, rawSocket
+
+        beforeEach(() => {
+            socket = context.connect("ws")
+            rawSocket = windowRef.sockets[`ws://${windowRef.location.host}/ws`]
+        })
+
+        function receiveEvent(event) {
+            rawSocket.onmessage({data: JSON.stringify(event)})
+        }
+
+        it('calls back when a message is received', async () => {
+            const expectedMessage = {type: "a", key: "users-brady-name", value: "Ben Rady"}
+            const receivedMessages = []
+            socket.onJSON((message) => receivedMessages.push(message))
+            receiveEvent(expectedMessage)
+            expect(receivedMessages).toEqual([{type: "a", key: "users-brady-name", value: "Ben Rady"}])
+        })
+
         it('caches outgoing messages until the websocket is connected', async () => {
             socket.send('foo')
             expect(rawSocket.sentMessages).toEqual([])
 
             rawSocket.onopen()
             expect(rawSocket.sentMessages).toEqual(['foo'])
-        })
-
-        it('clears out the state when reconnecting', async () => {
-            sendEvent({type: "a", key: "users-brady-name", value: "Ben Rady"})
-            rawSocket.onopen()
-            expect(socket.state()).toEqual({})
         })
     })
 

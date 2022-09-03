@@ -1,32 +1,17 @@
-export const ADD_TYPE = "a"
-export const DELETE_TYPE = "d"
-
 export const events = {
     viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
 
 function createSocket(socket, config) {
+    const callbacks = [];
     let memo = {}
-    const updateCallbacks = {}
-    updateCallbacks[ADD_TYPE] = []
-    updateCallbacks[DELETE_TYPE] = []; 
     socket.onmessage = function (e) { 
-        const event = JSON.parse(e.data)
+        const message = JSON.parse(e.data)
         if (config.memoizer) {
-            config.memoizer(memo, event)
+            config.memoizer(memo, message)
         }
-        // TODO Remove these callbacks
-        if (event.type === ADD_TYPE) {
-            memo[event.key] = event.value
-            for (let cb of updateCallbacks[event.type]) {
-                cb(event.key, event.value)
-            }
-        }
-        if (event.type === DELETE_TYPE) {
-            delete memo[event.key]
-            for (let cb of updateCallbacks[event.type]) {
-                cb(event.key)
-            }
+        for (let callback of callbacks) {
+            callback(message)
         }
     }
 
@@ -42,19 +27,16 @@ function createSocket(socket, config) {
         socket.send(JSON.stringify(message))
     }
 
+    function onJSON(callback) {
+        callbacks.push(callback)
+    }
+
     return {
         state,
         sendJSON,
+        onJSON,
         send: function(message) {
             socket.send(message)
-        },
-
-        onAdd: function(callback) {
-            updateCallbacks[ADD_TYPE].push(callback)
-        },
-
-        onDelete: function(callback) {
-            updateCallbacks[DELETE_TYPE].push(callback)
         },
     }
 }
