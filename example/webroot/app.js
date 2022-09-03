@@ -6,16 +6,17 @@ export function initShell(context) {
     const navbar = shell.querySelector('.navbar')
     context.addEventListener('smartsocket.viewChange', (e) => {
         navbar.querySelector('a.selected').classList.remove('selected');
-        navbar.querySelector(`a[href="${context.currentView()}"]`).classList.add('selected')
+        navbar.querySelector(`a[href="${context.currentView() || '#home'}"]`).classList.add('selected')
     })
     return shell
 }
 
-export function aboutView(context) {
-    return context.template('AboutView')
+export function homeView(context) {
+    // TODO Turn this into the main page and add some docs
+    return context.template('HomeView')
 }
 
-export function mainView(context) {
+export function socketView(context) {
     function addKey(key, value) {
         let row = rows[key]
         if (!row) {
@@ -96,9 +97,9 @@ export async function jsonView(context) {
 // TODO Interval / nowMillis clock example
 
 export const routes = {
-    "": mainView,
-    "#": mainView,
-    "#main": mainView,
+    "": homeView,
+    "#": homeView,
+    "#home": homeView,
+    "#socket": socketView,
     "#json": jsonView,
-    "#about": aboutView
 }

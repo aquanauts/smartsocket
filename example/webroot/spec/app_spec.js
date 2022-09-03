@@ -1,6 +1,6 @@
 import {createFakeBrowserWindow, fetchTemplates} from "./support.js"
 import {createContext, events} from "../smartsocket.js"
-import {initShell, mainView, aboutView, jsonView, ADD_TYPE, DELETE_TYPE} from "../app.js"
+import {initShell, socketView, homeView, jsonView, routes, ADD_TYPE, DELETE_TYPE} from "../app.js"
 
 describe('Example application', () => {
     let templates, context, windowRef
@@ -15,22 +15,33 @@ describe('Example application', () => {
         context = createContext(windowRef)
     })
 
-    it('has an about view', async () => {
-        const view = aboutView(context)
-        expect(view.innerHTML).toContain('About')
+    it('has a landing view', async () => {
+        const view = homeView(context)
+        expect(view.innerHTML).toContain('Smartsocket')
     })
+
+    it('has valid links', async () => {
+        templates.content.querySelectorAll('a').forEach((anchor) => {
+            expect(Object.keys(routes)).toContain(anchor.getAttribute('href'))
+        })
+    });
 
     describe('shell', () => {
         let shell
         beforeEach(() => {
             shell = initShell(context)
+            windowRef.location.hash = ''
+            windowRef.dispatchEvent(events.viewChange())
+        });
+
+        it('select the home view by default', async () => {
+            expect(shell.querySelector('.navbar a[href="#home"]')).toHaveClass('selected')
         });
 
         it('selects the current view in the navbar when it changes', async () => {
-            expect(shell.querySelector('.navbar a[href="#main"]')).toHaveClass('selected')
             windowRef.location.hash = '#json'
             windowRef.dispatchEvent(events.viewChange())
-            expect(shell.querySelector('.navbar a[href="#main"]')).not.toHaveClass('selected')
+            expect(shell.querySelector('.navbar a[href="#home"]')).not.toHaveClass('selected')
             expect(shell.querySelector('.navbar a[href="#json"]')).toHaveClass('selected')
         });
     });
@@ -39,7 +50,7 @@ describe('Example application', () => {
         let view, socket
 
         beforeEach(() => {
-            view = mainView(context)
+            view = socketView(context)
             socket = windowRef.sockets[`ws://${windowRef.location.host}/ws`]
 
             // TODO this is clunky
