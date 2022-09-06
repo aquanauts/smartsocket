@@ -11,11 +11,7 @@ A common technique in the finance industry is to record application state as a s
 
 ### Hash-Based Routing
 
-Like many single page applications, Smartsocket keeps track of view state by changing the URL hash. This allows the application to switch from one "page" to another without reloading. This not only makes for a smoother user experience, but also makes it easy to persist and cache data between page transitions.
-
-### Custom Events
-
-TODO
+Like many single page applications, Smartsocket keeps track of view state by changing the URL hash. This allows the application to switch from one "view" to another without reloading the page. This not only makes for a smoother user experience, but also makes it easy to persist and cache data between page transitions. Resources like sockets and timers are cleaned up automatically when the router changes to a new view.
 
 ### HTML Templating
 

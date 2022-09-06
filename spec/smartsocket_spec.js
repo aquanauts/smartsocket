@@ -20,6 +20,15 @@ describe('Smartsocket', () => {
         expect(result).toEqual({one: 2})
     })
 
+    it('can fetch JSON documents in a callback', async () => {
+        windowRef.setResponse('/some/url', JSON.stringify({one: 2}))
+        let actualResult
+        context.getJSON('/some/url').then((response) => response.then((result) => { 
+            actualResult = result 
+        }))
+        expect(actualResult).toEqual({one: 2})
+    })
+
     it('raises an error if a request fails', async () => {
         windowRef.fetch = (url) => Promise.reject("Error!")
         const errors = []
@@ -145,7 +154,7 @@ describe('Smartsocket', () => {
                 "#params": (_, viewParams) => {
                     const view = windowRef.document.createElement('div')
                     view.className = 'ParamView'
-                    for(let [key, value] of viewParams.entries()) {
+                    for(let [key, value] of Object.entries(viewParams)) {
                         view.setAttribute(key, value)
                     }
                     return view

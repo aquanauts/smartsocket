@@ -96,14 +96,24 @@ describe('Example application', () => {
             windowRef.setResponse('/state.json', JSON.stringify({
                 foo: "bar"
             }))
-            view = await jsonView(context)
+            view = await jsonView(context, {})
         });
 
         it('displays the current state', async () => {
-            const tbody = view.querySelector('.StateTable tbody')
-            const row = tbody.querySelector('tr')
+            const row = view.querySelector('.StateTable tbody tr')
             expect(row.querySelector('td.Key').textContent).toEqual("foo")
             expect(row.querySelector('td.Value').textContent).toEqual("bar")
+        });
+
+        // TODO Fails because of async promise
+        it('can refresh the state on a timer', async () => {
+            view = await jsonView(context, {refreshInterval: 2000})
+            windowRef.setResponse('/state.json', JSON.stringify({
+                foo: "baz"
+            }))
+            windowRef.timePasses(2001)
+            const row = view.querySelector('.StateTable tbody tr')
+            expect(row.querySelector('td.Value').textContent).toEqual("baz")
         });
     });
 })

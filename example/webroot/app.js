@@ -12,7 +12,6 @@ export function initShell(context) {
 }
 
 export function homeView(context) {
-    // TODO Turn this into the main page and add some docs
     return context.template('HomeView')
 }
 
@@ -75,26 +74,33 @@ export function socketView(context) {
     return view
 }
 
-export async function jsonView(context) {
+export async function jsonView(context, viewParams) {
+    function updateState(newState) {
+        const container = view.querySelector('.TableContainer')
+        const table = context.template('StateTable')
+        const tbody = table.querySelector('tbody');
+        for(let [key, value] of Object.entries(newState)) {
+            const row = context.template('StateRow')
+            row.querySelector('.Key').textContent = key
+            row.querySelector('.Value').textContent = value
+            tbody.append(row)
+        }
+        container.innerHTML = ''
+        container.append(table)
+    }
+
     const view = context.template('JsonView')
     const state = await context.getJSON('/state.json')
-    const container = view.querySelector('.TableContainer')
-    const table = context.template('StateTable')
-    const tbody = table.querySelector('tbody');
-    for(let [key, value] of Object.entries(state)) {
-        const row = context.template('StateRow')
-        row.querySelector('.Key').textContent = key
-        row.querySelector('.Value').textContent = value
-        tbody.append(row)
+    updateState(state)
+    // TODO UI element to set this value
+    if (viewParams.refreshInterval) {
+        // TODO Need to cancel the interval automatically when the view changes
+        context.setInterval(() => {  
+            context.getJSON('/state.json', {}, updateState)
+        }, 1000)
     }
-    container.innerHTML = ''
-    container.append(table)
     return view
 }
-
-// TODO View parameters
-// TODO Timer example
-// TODO Interval / nowMillis clock example
 
 export const routes = {
     "": homeView,

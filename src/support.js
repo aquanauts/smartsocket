@@ -1,3 +1,64 @@
+/**
+ * Unlike A+ standard Promises, Deferreds which are already resolved or 
+ * rejected invoke their callback synchronously.
+ *
+ * This makes testing much easier.
+ */
+export class Deferred {
+    constructor(handler) {
+        this.status = "pending";
+        this.value = null;
+
+        const resolve = value => {
+            if (this.status === "pending") {
+                this.status = "fulfilled";
+                this.value = value;
+            }
+        };
+        const reject = value => {
+            if (this.status === "pending") {
+                this.status = "rejected";
+                this.value = value;
+            }
+        };
+
+        try {
+            handler(resolve, reject);
+        } catch (err) {
+            reject(err);
+        }
+    }
+
+    then(onFulfilled, onRejected) {
+        if (this.status === "fulfilled") {
+            return Deferred.resolve(onFulfilled(this.value));
+        } else if (this.status === "rejected") {
+            return Deferred.reject(onRejected(this.value));
+        }
+    }
+
+    catch(onRejected) {
+        // TODO return here?
+        this.then(() => {}, onRejected)
+    }
+
+    finally(onFinally) {
+        return this.then(() => { onFinally() })
+    }
+
+    static resolve(value) {
+        return new Deferred((resolve, reject) => {
+            resolve(value);
+        })
+    }
+
+    static reject(error) {
+        return new Deferred((resolve, reject) => {
+            reject(error);
+        })
+    }
+}
+
 export function createFakeBrowserWindow(options) {
     const listeners = {}
     const responses = {}
@@ -76,11 +137,11 @@ export function createFakeBrowserWindow(options) {
         document: fakeDocument,
         fetch: (url) => {
             if (url in responses) {
-                return Promise.resolve({
-                    json: () => Promise.resolve(JSON.parse(responses[url]))
+                return Deferred.resolve({
+                    json: () => Deferred.resolve(JSON.parse(responses[url]))
                 })
             } else {
-                return Promise.reject("No response set for url: " + url)
+                return Deferred.reject("No response set for url: " + url)
             }
         },
         Date: {

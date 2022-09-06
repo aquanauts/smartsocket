@@ -1,4 +1,23 @@
-import {createFakeBrowserWindow} from '../src/support.js'
+import {createFakeBrowserWindow, Deferred} from '../src/support.js'
+
+describe('synchronous deferred', () => {
+    it('resolves synchronously', async () => {
+        let actualValue
+        const deferred = Deferred.resolve("hello world")
+        deferred.then(value => { actualValue = value})
+        expect(actualValue).toEqual("hello world");
+    });
+
+    it('can chain then() calls', async () => {
+        let actualGreeting
+        const deferred = new Deferred((resolved, rejected) => {
+            resolved("hello")
+        }).then((greeting) => greeting + " world")
+          .then((greeting) => greeting + "!")
+          .then((greeting) => { actualGreeting = greeting })
+        expect(actualGreeting).toEqual("hello world!")
+    });
+});
 
 describe('fake browser', () => {
     let windowRef

@@ -1,3 +1,4 @@
+// TODO Add specific methods for these
 export const events = {
     viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
@@ -288,19 +289,20 @@ export function createContext(windowRef) {
         return node.cloneNode(true)
     }
 
-    function getJSON(url, options) {
-        return new Promise((resolve, reject) => {
-            windowRef.fetch(url, options).
-                then((response) => resolve(response.json())).
-                catch((error) => reject(error))
-        })
+    function getJSON(url, options, callback) {
+        callback = callback || ((value) => value)
+        return windowRef.fetch(url, options).then((response) => response.json().then(callback))
     }
 
     function parseRoute(routes) {
         const hash = windowRef.location.hash
         const viewName = currentView()
         const viewFn = routes[viewName]
-        return [new URLSearchParams(hash.split('?')[1]), viewFn]
+        const params = {}
+        for (const [key, value] of new URLSearchParams(hash.split('?')[1])) {
+            params[key] = value
+        }
+        return [params, viewFn]
     }
 
     async function showView(routes, viewContainer) {
@@ -326,6 +328,7 @@ export function createContext(windowRef) {
     function startRouter(routes, viewContainer) {
         windowRef.addEventListener("hashchange", async () => {
             await showView(routes, viewContainer)
+            return false
         })
         return showView(routes, viewContainer)
     }
