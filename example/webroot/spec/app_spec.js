@@ -22,7 +22,9 @@ describe('Example application', () => {
 
     it('has valid links', async () => {
         templates.content.querySelectorAll('a').forEach((anchor) => {
-            expect(Object.keys(routes)).toContain(anchor.getAttribute('href'))
+            const validRoutes = Object.keys(routes)
+            const link = anchor.getAttribute('href')
+            expect(validRoutes.some((route) => link.split('?')[0] === route)).toBe(true, `${link} does not include one of ${validRoutes}`)
         })
     });
 

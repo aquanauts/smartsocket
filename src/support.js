@@ -64,6 +64,7 @@ export function createFakeBrowserWindow(options) {
     const responses = {}
     const socketSequences = {}
     const scheduledTimeouts = {}
+    const callbackIndex = []
     const sockets = {}
     let currTime = 0
     const fakeDocument = new Document()
@@ -92,12 +93,19 @@ export function createFakeBrowserWindow(options) {
         responses[url] = responseBody
     }
 
-    function fakeSetTimeout(callback, interval) {
+    function scheduleCallback(callbackId, interval) {
         const scheduleTime = interval + currTime
         if (!(scheduleTime in scheduledTimeouts)) {
             scheduledTimeouts[scheduleTime] = []
         }
-        scheduledTimeouts[scheduleTime].push(callback)
+        scheduledTimeouts[scheduleTime].push(callbackId)
+    }
+
+    function fakeSetTimeout(callback, interval) {
+        callbackIndex.push(callback)
+        const callbackId = callbackIndex.length - 1
+        scheduleCallback(callbackId, interval)
+        return callbackId
     }
 
     return {
@@ -113,17 +121,22 @@ export function createFakeBrowserWindow(options) {
             }
         },
         setInterval: (callback, interval) => {
-            fakeSetTimeout(() => {
+            const intervalId = fakeSetTimeout(() => {
                 callback()
-                fakeSetTimeout(callback, interval)
+                scheduleCallback(intervalId, interval)
             }, interval)
+            return intervalId
+        },
+        clearInterval: (intervalId) => {
+            callbackIndex[intervalId] = undefined
         },
         setTimeout: fakeSetTimeout,
         timePasses: (interval) => {
             currTime += interval
-            for (let [scheduleTime, callbacks] of Object.entries(scheduledTimeouts)) {
+            for (let [scheduleTime, callbackIds] of Object.entries(scheduledTimeouts)) {
                 if (scheduleTime <= currTime) {
-                    for(let callback of callbacks) {
+                    for(let callbackId of callbackIds) {
+                        const callback = callbackIndex[callbackId] || (() => {})
                         callback()
                     }
                     delete scheduledTimeouts[scheduleTime]

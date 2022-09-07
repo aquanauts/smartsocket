@@ -167,6 +167,11 @@ describe('Smartsocket', () => {
             }
         })
 
+        function changeView(newRoute) {
+            windowRef.location.hash = newRoute
+            windowRef.dispatchEvent(new Event('hashchange'))
+        }
+
         it('loads the current view when the router is made ready', async () => {
             context.startRouter(routes, viewContainer)
             const view = viewContainer.querySelector('.MainView')
@@ -175,8 +180,7 @@ describe('Smartsocket', () => {
 
         it('switches to the new view when the hashchange event is triggered', async () => {
             context.startRouter(routes, viewContainer)
-            windowRef.location.hash = '#params'
-            windowRef.dispatchEvent(new Event('hashchange'))
+            changeView('#params')
             expect(viewContainer.querySelector('.ParamView')).not.toBeNull()
             expect(viewContainer.querySelector('.MainView')).toBeNull()
         })
@@ -193,8 +197,7 @@ describe('Smartsocket', () => {
             const callback = jasmine.createSpy('callback')
             context.startRouter(routes, viewContainer)
             context.addEventListener('smartsocket.viewChange', callback)
-            windowRef.location.hash = '#params'
-            windowRef.dispatchEvent(new Event('hashchange'))
+            changeView('#params')
             expect(callback).toHaveBeenCalled()
         })
 
@@ -204,6 +207,26 @@ describe('Smartsocket', () => {
             const view = viewContainer.querySelector('.AsyncView')
             expect(view).not.toBeNull()
         })
+
+        it('cancels timers when the view changes', async () => {
+            let ticks = 0
+            windowRef.location.hash = '#timer'
+            await context.startRouter({...routes, 
+                '#timer': (context) => {  
+                    context.setInterval(() => { ticks += 1 }, 1000)
+                }
+            }, viewContainer)
+            windowRef.timePasses(1000)
+            expect(ticks).toEqual(1)
+
+            changeView('#view')
+            windowRef.timePasses(1000)
+            expect(ticks).toEqual(1)
+        });
+
+        // TODO Cleans up event handlers when the view changes
+        
+        // TODO Cleans up sockets when the view changes
     })
 })
 

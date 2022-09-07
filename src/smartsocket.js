@@ -6,6 +6,7 @@ export const events = {
 function createSocket(socket, config) {
     const callbacks = [];
     let memo = {}
+
     socket.onmessage = function (e) { 
         const message = JSON.parse(e.data)
         if (config.memoizer) {
@@ -306,6 +307,7 @@ export function createContext(windowRef) {
     }
 
     async function showView(routes, viewContainer) {
+        cleanupResources()
         const [viewParams, viewFn] = parseRoute(routes)
         let view
         if (viewFn.constructor.name === 'AsyncFunction') {
@@ -315,6 +317,13 @@ export function createContext(windowRef) {
         }
         viewContainer.replaceChildren(view)
         windowRef.dispatchEvent(new CustomEvent('smartsocket.viewChange'))
+    }
+
+    function cleanupResources() {
+        for (let id of intervalIDs) {
+            windowRef.clearInterval(id)
+        }
+        intervalIDs = []
     }
 
     function connect(config) {
@@ -337,9 +346,17 @@ export function createContext(windowRef) {
         return windowRef.location.hash.split('?')[0]
     }
 
+    function _setInterval(callback, interval) {
+        const intervalID = windowRef.setInterval(callback, interval)
+        intervalIDs.push(intervalID)
+        return intervalID
+    }
+
+    let intervalIDs = []
+
     const context = {
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
-        setInterval: (callback, interval) => windowRef.setInterval(callback, interval),
+        setInterval: _setInterval,
         setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
         getJSON,
         template,

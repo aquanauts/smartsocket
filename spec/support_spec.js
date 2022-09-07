@@ -17,6 +17,8 @@ describe('synchronous deferred', () => {
           .then((greeting) => { actualGreeting = greeting })
         expect(actualGreeting).toEqual("hello world!")
     });
+
+    // TODO catch() test
 });
 
 describe('fake browser', () => {
@@ -104,6 +106,14 @@ describe('fake browser', () => {
         windowRef.timePasses(2000)
         expect(callback.calls.count()).toEqual(2)
     })
+
+    it('can cancel a task', async () => {
+        const callback = jasmine.createSpy('callback')
+        const id = windowRef.setInterval(callback, 1000)
+        windowRef.clearInterval(id)
+        windowRef.timePasses(1000)
+        expect(callback).not.toHaveBeenCalled()
+    });
 
     describe('stub WebSocket', () => {
         let ws
