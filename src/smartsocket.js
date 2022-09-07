@@ -3,6 +3,7 @@ export const events = {
     viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
 
+// TODO Just return the reconnecting socket here?
 function createSocket(socket, config) {
     const callbacks = [];
     let memo = {}
@@ -320,10 +321,15 @@ export function createContext(windowRef) {
     }
 
     function cleanupResources() {
-        for (let id of intervalIDs) {
+        for (let id of timerIds) {
             windowRef.clearInterval(id)
         }
-        intervalIDs = []
+        timerIds = []
+
+        for(let socket of sockets) {
+            socket.close()
+        }
+        sockets = []
     }
 
     function connect(config) {
@@ -331,6 +337,7 @@ export function createContext(windowRef) {
         const protocols = []
         const options = {}
         const socket = new ReconnectingSmartSocket(config.url, protocols, options)
+        sockets.push(socket)
         return createSocket(socket, config)
     }
 
@@ -348,16 +355,23 @@ export function createContext(windowRef) {
 
     function _setInterval(callback, interval) {
         const intervalID = windowRef.setInterval(callback, interval)
-        intervalIDs.push(intervalID)
+        timerIds.push(intervalID)
         return intervalID
     }
 
-    let intervalIDs = []
+    function _setTimeout(callback, interval) {
+        const timeoutID = windowRef.setTimeout(callback, interval)
+        timerIds.push(timeoutID)
+        return timeoutID
+    }
+
+    let timerIds = []
+    let sockets = []
 
     const context = {
         addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
         setInterval: _setInterval,
-        setTimeout: (callback, interval) => windowRef.setTimeout(callback, interval),
+        setTimeout: _setTimeout,
         getJSON,
         template,
         startRouter,

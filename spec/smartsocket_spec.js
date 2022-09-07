@@ -214,6 +214,7 @@ describe('Smartsocket', () => {
             await context.startRouter({...routes, 
                 '#timer': (context) => {  
                     context.setInterval(() => { ticks += 1 }, 1000)
+                    context.setTimeout(() => { ticks += 1 }, 2000)
                 }
             }, viewContainer)
             windowRef.timePasses(1000)
@@ -222,6 +223,19 @@ describe('Smartsocket', () => {
             changeView('#view')
             windowRef.timePasses(1000)
             expect(ticks).toEqual(1)
+        });
+
+        it('closes sockets when the view changes', async () => {
+            windowRef.location.hash = '#socket'
+            await context.startRouter({...routes, 
+                '#socket': (context) => {  
+                    context.connect('ws')
+                }
+            }, viewContainer)
+            const rawSocket = windowRef.sockets[`ws://${windowRef.location.host}/ws`]
+
+            changeView('#view')
+            expect(rawSocket.readyState).toEqual(WebSocket.CLOSED)
         });
 
         // TODO Cleans up event handlers when the view changes

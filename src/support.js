@@ -79,10 +79,14 @@ export function createFakeBrowserWindow(options) {
         constructor(url) {
             this.url = url
             this.sentMessages = []
+            this.readyState = WebSocket.CONNECTING
             sockets[url] = this
         }
         send(msg) {
             this.sentMessages.push(msg)
+        }
+        close() {
+            this.readyState = WebSocket.CLOSED
         }
         deliver(msg) {
             this.onmessage({data: msg})

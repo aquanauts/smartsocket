@@ -107,6 +107,10 @@ describe('Example application', () => {
             expect(row.querySelector('td.Value').textContent).toEqual("bar")
         });
 
+        it('display the last updated time', async () => {
+            expect(view.querySelector('.Timestamp').innerText).toEqual(new Date(context.nowMillis()).toString());
+        });
+
         // TODO Fails because of async promise
         it('can refresh the state on a timer', async () => {
             view = await jsonView(context, {refreshInterval: 2000})

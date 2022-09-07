@@ -76,6 +76,7 @@ export function socketView(context) {
 
 export async function jsonView(context, viewParams) {
     function updateState(newState) {
+        view.querySelector('.Timestamp').innerText = new Date(context.nowMillis())
         const container = view.querySelector('.TableContainer')
         const table = context.template('StateTable')
         const tbody = table.querySelector('tbody');
