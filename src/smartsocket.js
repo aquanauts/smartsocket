@@ -2,7 +2,6 @@ export const events = {
     viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
 
-// TODO Just return the reconnecting socket here?
 function createSocket(socket, config) {
     const callbacks = [];
     let memo = {}
@@ -283,12 +282,13 @@ export function createContext(windowRef) {
     function template(name) {
         const templates = windowRef.document.querySelector('template').content
         const nodes = templates.querySelectorAll("." + name)
-        // TODO Be a little more defensive here in case there are colliding names
-        const node = nodes[0]
-        if (node === null) {
+        if (nodes.length === 0) {
             throw new Error(`Could not find a node with class '${name}' in the <template> element`)
         }
-        return node.cloneNode(true)
+        if (nodes.length > 1) {
+            throw new Error(`Found multiple nodes with class '${name}' in the <template> element`)
+        }
+        return nodes[0].cloneNode(true)
     }
 
     function getJSON(url, options, callback) {

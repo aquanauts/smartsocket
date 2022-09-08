@@ -68,6 +68,22 @@ describe('Smartsocket', () => {
             windowRef.document.body.append(templateElem)
             context.template("MyElem")
         })
+
+        it('should raise an error if more than one element matches', async () => {
+            const templateElem = new DOMParser().parseFromString(`<template>
+                <div class="MyElem">Foobar</div>
+                <div class="MyElem">Bizbaz</div>
+            </template>`, 'text/html').querySelector('template')
+            windowRef.document.body.append(templateElem)
+            expect(() => { context.template('MyElem') }).toThrow(new Error("Found multiple nodes with class 'MyElem' in the <template> element"))
+        });
+
+        it('should raise an error if no element matches', async () => {
+            const templateElem = new DOMParser().parseFromString(`<template>
+            </template>`, 'text/html').querySelector('template')
+            windowRef.document.body.append(templateElem)
+            expect(() => { context.template('MyElem') }).toThrow(new Error("Could not find a node with class 'MyElem' in the <template> element"))
+        });
     })
 
     describe('smart socket with a memoizer', () => {
