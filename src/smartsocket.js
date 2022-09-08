@@ -300,6 +300,9 @@ export function createContext(windowRef) {
         const hash = windowRef.location.hash
         const viewName = currentView()
         const viewFn = routes[viewName]
+        if (!viewFn) {
+            throw Error(`Could not find route named ${viewName} in routes ${Object.keys(routes)}`)
+        }
         const params = {}
         for (const [key, value] of new URLSearchParams(hash.split('?')[1])) {
             params[key] = value
@@ -310,7 +313,6 @@ export function createContext(windowRef) {
     async function showView(routes, viewContainer) {
         cleanupResources()
         const [viewParams, viewFn] = parseRoute(routes)
-        // TODO Better handling for missing route
         let view
         if (viewFn.constructor.name === 'AsyncFunction') {
             view = await viewFn(context, viewParams)

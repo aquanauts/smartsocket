@@ -224,6 +224,13 @@ describe('Smartsocket', () => {
             expect(view).not.toBeNull()
         })
 
+        it('raises an error when the route is incorrect', async () => {
+            const callback = jasmine.createSpy('callback')
+            windowRef.location.hash = '#missing'
+            await context.startRouter(routes, viewContainer).catch(callback)
+            expect(callback).toHaveBeenCalledWith(new Error('Could not find route named #missing in routes #view,#params,#async'))
+        });
+
         it('cancels timers when the view changes', async () => {
             let ticks = 0
             windowRef.location.hash = '#timer'
