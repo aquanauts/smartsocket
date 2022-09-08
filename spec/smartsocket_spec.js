@@ -239,8 +239,6 @@ describe('Smartsocket', () => {
         });
 
         // TODO Cleans up event handlers when the view changes
-        
-        // TODO Cleans up sockets when the view changes
     })
 })
 

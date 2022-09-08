@@ -111,7 +111,6 @@ describe('Example application', () => {
             expect(view.querySelector('.Timestamp').innerText).toEqual(new Date(context.nowMillis()).toString());
         });
 
-        // TODO Fails because of async promise
         it('can refresh the state on a timer', async () => {
             view = await jsonView(context, {refreshInterval: 2000})
             windowRef.setResponse('/state.json', JSON.stringify({

@@ -38,12 +38,11 @@ export class Deferred {
     }
 
     catch(onRejected) {
-        // TODO return here?
-        this.then(() => {}, onRejected)
+        return this.then(() => {}, onRejected)
     }
 
     finally(onFinally) {
-        return this.then(() => { onFinally() })
+        return this.catch(() => { onFinally() }, () => { onFinally() })
     }
 
     static resolve(value) {

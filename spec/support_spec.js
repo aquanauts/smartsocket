@@ -18,7 +18,30 @@ describe('synchronous deferred', () => {
         expect(actualGreeting).toEqual("hello world!")
     });
 
-    // TODO catch() test
+    it('handles rejects with catch()', async () => {
+        let actualError
+        const deferred = new Deferred((resolved, rejected) => {
+            rejected("error!")
+        }).catch((error) => actualError = error)
+        expect(actualError).toEqual('error!')
+    });
+
+    it('handles thrown errors with catch()', async () => {
+        let actualError
+        const deferred = new Deferred((resolved, rejected) => {
+            throw "error!"
+        }).catch((error) => actualError = error)
+        expect(actualError).toEqual('error!')
+    });
+
+    it('always calls finally()', async () => {
+        const callback = jasmine.createSpy('callback')
+        const deferred = new Deferred((resolved, rejected) => {
+            throw "error!"
+        }).catch((error) => error)
+          .finally(callback)
+        expect(callback).toHaveBeenCalled()
+    });
 });
 
 describe('fake browser', () => {
@@ -54,7 +77,7 @@ describe('fake browser', () => {
 
     it('returns an error for unknown fetch URLs', async () => {
         let error
-        await windowRef.fetch('/unknown').catch((e) => {error = e})
+        windowRef.fetch('/unknown').catch((e) => {error = e})
         expect(error).toEqual("No response set for url: /unknown")
     });
 

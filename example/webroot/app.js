@@ -93,9 +93,7 @@ export async function jsonView(context, viewParams) {
     const view = context.template('JsonView')
     const state = await context.getJSON('/state.json')
     updateState(state)
-    // TODO UI element to set this value
     if (viewParams.refreshInterval) {
-        // TODO Need to cancel the interval automatically when the view changes
         context.setInterval(() => {  
             context.getJSON('/state.json', {}, updateState)
         }, 1000)
