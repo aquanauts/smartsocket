@@ -55,7 +55,7 @@ describe('Example application', () => {
             view = socketView(context)
             socket = windowRef.sockets[`ws://${windowRef.location.host}/ws`]
 
-            // TODO this is clunky
+            // Need to explicitly open the socket before messages can be sent
             socket.onopen()
         })
         
