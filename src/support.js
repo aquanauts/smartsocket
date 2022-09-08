@@ -118,6 +118,10 @@ export function createFakeBrowserWindow(options) {
             }
             listeners[eventType].push(callback)
         },
+        removeEventListener: (eventType, callback) => {
+            const index = listeners[eventType].indexOf(callback)
+            listeners[eventType].splice(index, 1)
+        },
         dispatchEvent: (event) => {
             for(let listener of listeners[event.type] || []) {
                 listener(event)

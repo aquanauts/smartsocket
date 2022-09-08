@@ -1,4 +1,3 @@
-// TODO Add specific methods for these
 export const events = {
     viewChange: () => new CustomEvent('smartsocket.viewChange')
 }
@@ -283,8 +282,9 @@ export function createContext(windowRef) {
 
     function template(name) {
         const templates = windowRef.document.querySelector('template').content
+        const nodes = templates.querySelectorAll("." + name)
         // TODO Be a little more defensive here in case there are colliding names
-        const node = templates.querySelector("." + name)
+        const node = nodes[0]
         if (node === null) {
             throw new Error(`Could not find a node with class '${name}' in the <template> element`)
         }
@@ -310,6 +310,7 @@ export function createContext(windowRef) {
     async function showView(routes, viewContainer) {
         cleanupResources()
         const [viewParams, viewFn] = parseRoute(routes)
+        // TODO Better handling for missing route
         let view
         if (viewFn.constructor.name === 'AsyncFunction') {
             view = await viewFn(context, viewParams)
@@ -317,7 +318,7 @@ export function createContext(windowRef) {
             view = viewFn(context, viewParams)
         }
         viewContainer.replaceChildren(view)
-        windowRef.dispatchEvent(new CustomEvent('smartsocket.viewChange'))
+        windowRef.dispatchEvent(events.viewChange())
     }
 
     function cleanupResources() {
@@ -330,6 +331,11 @@ export function createContext(windowRef) {
             socket.close()
         }
         sockets = []
+
+        for(let [type, callback] of eventListeners) {
+            windowRef.removeEventListener(type, callback)
+        }
+        eventListeners = []
     }
 
     function connect(config) {
@@ -365,11 +371,22 @@ export function createContext(windowRef) {
         return timeoutID
     }
 
+    function _addEventListener(type, callback) {
+        windowRef.addEventListener(type, callback)
+        eventListeners.push([type, callback])
+    }
+
+    function onViewChange(callback) {
+        windowRef.addEventListener(events.viewChange().type, callback)
+    }
+
     let timerIds = []
     let sockets = []
+    let eventListeners = []
 
     const context = {
-        addEventListener: (type, callback) => windowRef.addEventListener(type, callback),
+        addEventListener: _addEventListener,
+        onViewChange: onViewChange,
         setInterval: _setInterval,
         setTimeout: _setTimeout,
         getJSON,

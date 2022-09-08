@@ -196,7 +196,7 @@ describe('Smartsocket', () => {
         it('triggers an event after the view changes', async () => {
             const callback = jasmine.createSpy('callback')
             context.startRouter(routes, viewContainer)
-            context.addEventListener('smartsocket.viewChange', callback)
+            context.onViewChange(callback)
             changeView('#params')
             expect(callback).toHaveBeenCalled()
         })
@@ -211,8 +211,8 @@ describe('Smartsocket', () => {
         it('cancels timers when the view changes', async () => {
             let ticks = 0
             windowRef.location.hash = '#timer'
-            await context.startRouter({...routes, 
-                '#timer': (context) => {  
+            await context.startRouter({...routes,
+                '#timer': (context) => {
                     context.setInterval(() => { ticks += 1 }, 1000)
                     context.setTimeout(() => { ticks += 1 }, 2000)
                 }
@@ -227,8 +227,8 @@ describe('Smartsocket', () => {
 
         it('closes sockets when the view changes', async () => {
             windowRef.location.hash = '#socket'
-            await context.startRouter({...routes, 
-                '#socket': (context) => {  
+            await context.startRouter({...routes,
+                '#socket': (context) => {
                     context.connect('ws')
                 }
             }, viewContainer)
@@ -238,7 +238,20 @@ describe('Smartsocket', () => {
             expect(rawSocket.readyState).toEqual(WebSocket.CLOSED)
         });
 
-        // TODO Cleans up event handlers when the view changes
+        it('removes event handlers when the view changes', async () => {
+            const callback = jasmine.createSpy('callback');
+            windowRef.location.hash = '#event'
+            await context.startRouter({...routes,
+                '#event': (context) => {
+                    context.addEventListener('myEvent', callback)
+                }
+            }, viewContainer)
+
+            changeView('#view')
+            windowRef.dispatchEvent(new CustomEvent('myEvent'))
+            expect(callback).not.toHaveBeenCalled()
+        });
+
     })
 })
 
