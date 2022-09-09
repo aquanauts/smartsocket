@@ -4,7 +4,7 @@ export const DELETE_TYPE = "d"
 export function initShell(context) {
     const shell = context.template('shell')
     const navbar = shell.querySelector('.navbar')
-    context.addEventListener('smartsocket.viewChange', (e) => {
+    context.onViewChange(() => {
         navbar.querySelector('a.selected').classList.remove('selected');
         navbar.querySelector(`a[href="${context.currentView() || '#home'}"]`).classList.add('selected')
     })
@@ -94,7 +94,7 @@ export async function jsonView(context, viewParams) {
     const state = await context.getJSON('/state.json')
     updateState(state)
     if (viewParams.refreshInterval) {
-        context.setInterval(() => {  
+        context.setInterval(() => {
             context.getJSON('/state.json', {}, updateState)
         }, 1000)
     }

@@ -58,7 +58,7 @@ describe('Example application', () => {
             // Need to explicitly open the socket before messages can be sent
             socket.onopen()
         })
-        
+
         it('sends an add message when the form is filled', async () => {
             const form = view.querySelector('.AddForm')
             form.querySelector('#keyInput').value = 'foo'
