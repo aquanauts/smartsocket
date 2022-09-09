@@ -1,4 +1,4 @@
-const http = require( 'http');
+const http = require('http');
 const url = require('url');
 const WebSocketServer = require('ws');
 const fs = require('fs');
@@ -7,9 +7,14 @@ const path = require('path');
 let state = {};
 
 const server = http.createServer(function (request, response) {
-    let filePath = '.' + request.url;
-    if (filePath === './')
-        filePath = './index.html';
+    if (request.url == '/state.json') {
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify(state));
+    }
+
+    let filePath = './webroot' + request.url;
+    if (filePath === './webroot/')
+        filePath += 'index.html';
 
     let extname = path.extname(filePath);
     let contentType = 'text/html';
@@ -27,11 +32,10 @@ const server = http.createServer(function (request, response) {
 
     fs.readFile(filePath, function(error, content) {
         if (error) {
-            if(error.code === 'ENOENT'){
-                fs.readFile('./404.html', function(error, content) {
-                    response.writeHead(200, { 'Content-Type': contentType });
-                    response.end(content, 'utf-8');
-                });
+            if(error.code === 'ENOENT') {
+                response.writeHead(400, { 'Content-Type': contentType });
+                response.end('File not found at ' + filePath + "\n");
+                response.end(content, 'utf-8');
             }
             else {
                 response.writeHead(500);

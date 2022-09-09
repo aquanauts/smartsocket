@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <style type="text/css">
+      .navbar a {
+        margin-right: 20px;
+      }
+      .navbar a:not(.selected) {
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <template>
+      <div class="shell">
+        <div class="header">
+          <div class="navbar">
+            <a href="#home" class='selected'>Home View</a>
+            <a href="#socket">Socket View</a>
+            <a href="#json">JSON View</a>
+          </div>
+        </div>
+        <hr>
+        <div class='viewContainer'></div>
+      </div>
+
+      <table id='table' border="1" class='StateTable'>
+        <thead>
+        <tr>
+          <th>Keys</th>
+          <th>Values</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+
+      <table>
+        <tbody>
+          <!-- You have to enclose a <tr> in a table body 
+            or some browsers will drop it from the markup when it's parsed-->
+          <tr class='StateRow'>
+            <td class='Key'></td>
+            <td class='Value'></td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <div class="MainView">
+        <h2>Socket State</h2>
+
+        <p>The table below shows all the state in the application. You can send messages to add, update, or delete that state and it will updates in all connected browser tabs.</p>
+        <h4>Current State</h4>
+        <div class="TableContainer">
+        </div>
+        
+        <hr>
+        <h4>Add State</h4>
+        <form class="AddForm">
+          <label for="keyInput">Key:</label>
+          <input id="keyInput" type="text">
+          <label for="valueInput">Value: </label>
+          <input id="valueInput" type="text">
+          <button>Send</button>
+        </form>
+        <hr>
+        <h4>Delete State</h4>
+        <form class="DeleteForm">
+          <label for="DeleteInput">Key:</label>
+          <input id="DeleteInput" type="text">
+          <button>Delete</button>
+        </form>
+      </div>
+
+      <div class="HomeView">
+        <h2>Smartsocket Example Application</h2>
+        <p>Here's some examples of what Smartsocket can do:</p>
+        <ul>
+          <li>
+            <a href="#socket">Synchronize application state across multiple browser tabs over a websocket, using incremental updates</a>
+          </li>
+          <li>
+            <a href="#json">Fetch the complete state all at once in a single request</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="JsonView">
+        <h2>JSON View</h2>
+        <p>Gets the application state as a complete JSON document via a GET request</p>
+        <h4>State Snapshot</h4>
+        <div class="TableContainer">
+        </div>
+        <hr/>
+        <h5>
+          <i>As of <span class='Timestamp'></span></i>
+        </h5>
+        <a href="#json?refreshInterval=1000">Enable Automatic Refresh</a>
+      </div>
+
+    </template>
+
+    <script type="module">
+      import {createContext} from "./smartsocket.js";
+      import {routes, initShell} from "./app.js";
+      const context = createContext()
+      const shell = initShell(context)
+      window.document.body.prepend(shell)
+      context.startRouter(routes, shell.querySelector('.viewContainer'))
+    </script>
+  </body>
+</html>
