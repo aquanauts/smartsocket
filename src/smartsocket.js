@@ -344,7 +344,11 @@ export function createContext(windowRef) {
         if (path.startsWith('ws://') || path.startsWith('wss://')) {
             return path
         }
-        return `ws://${windowRef.location.host}/${path}`
+        let protocol = 'ws'
+        if (windowRef.location.protocol === 'https') {
+            protocol = 'wss'
+        }
+        return `${protocol}://${windowRef.location.host}/${path}`
     }
 
     function connect(path, config) {

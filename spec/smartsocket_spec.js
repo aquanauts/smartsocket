@@ -91,6 +91,13 @@ describe('Smartsocket', () => {
         expect(Object.keys(windowRef.sockets)).toContain("wss://foo.com/bar/ws")
     });
 
+    it('can detect the right protocol for the URL', async () => {
+        windowRef.location.host = 'localhost:8080'
+        windowRef.location.protocol = 'https'
+        context.connect("routes/ws")
+        expect(Object.keys(windowRef.sockets)).toContain("wss://localhost:8080/routes/ws")
+    });
+
     describe('smart socket with a memoizer', () => {
         let socket, rawSocket
         beforeEach(() => {
