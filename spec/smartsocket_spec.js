@@ -23,8 +23,8 @@ describe('Smartsocket', () => {
     it('can fetch JSON documents in a callback', async () => {
         windowRef.setResponse('/some/url', JSON.stringify({one: 2}))
         let actualResult
-        context.getJSON('/some/url').then((response) => response.then((result) => { 
-            actualResult = result 
+        context.getJSON('/some/url').then((response) => response.then((result) => {
+            actualResult = result
         }))
         expect(actualResult).toEqual({one: 2})
     })
@@ -86,10 +86,15 @@ describe('Smartsocket', () => {
         });
     })
 
+    it('can create a socket using a fully qualified URL', async () => {
+        context.connect("wss://foo.com/bar/ws")
+        expect(Object.keys(windowRef.sockets)).toContain("wss://foo.com/bar/ws")
+    });
+
     describe('smart socket with a memoizer', () => {
         let socket, rawSocket
         beforeEach(() => {
-            socket = context.connect("ws", {memoizer: (memo, message) => {  
+            socket = context.connect("ws", {memoizer: (memo, message) => {
                 for (let [key, value] of Object.entries(message)) {
                     memo[key] = value
                 }

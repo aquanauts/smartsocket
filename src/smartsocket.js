@@ -6,7 +6,7 @@ function createSocket(socket, config) {
     const callbacks = [];
     let memo = {}
 
-    socket.onmessage = function (e) { 
+    socket.onmessage = function (e) {
         const message = JSON.parse(e.data)
         if (config.memoizer) {
             config.memoizer(memo, message)
@@ -340,8 +340,16 @@ export function createContext(windowRef) {
         eventListeners = []
     }
 
-    function connect(config) {
-        windowRef = windowRef || window
+    function findURL(path) {
+        if (path.startsWith('ws://') || path.startsWith('wss://')) {
+            return path
+        }
+        return `ws://${windowRef.location.host}/${path}`
+    }
+
+    function connect(path, config) {
+        let url = findURL(path)
+        config = {url, ...config}
         const protocols = []
         const options = {}
         const socket = new ReconnectingSmartSocket(config.url, protocols, options)
@@ -397,7 +405,7 @@ export function createContext(windowRef) {
         currentView,
         nowMillis: () => windowRef.Date.now(),
         connect: (path, options) => {
-            return connect({url:`ws://${windowRef.location.host}/${path}`, ...options}, windowRef)
+            return connect(path, options)
         },
     }
 
