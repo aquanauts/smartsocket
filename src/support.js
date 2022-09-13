@@ -1,5 +1,5 @@
 /**
- * Unlike A+ standard Promises, Deferreds which are already resolved or 
+ * Unlike A+ standard Promises, Deferreds which are already resolved or
  * rejected invoke their callback synchronously.
  *
  * This makes testing much easier.
@@ -177,7 +177,7 @@ export function createFakeBrowserWindow(options) {
 }
 
 export async function fetchTemplates(url) {
-    const response = await fetch('/base/example/webroot/index.html')
+    const response = await fetch(url)
     const markup = await response.text()
     const doc = new DOMParser().parseFromString(markup, 'text/html')
     return doc.querySelector('template')
