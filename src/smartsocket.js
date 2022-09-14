@@ -345,7 +345,7 @@ export function createContext(windowRef) {
             return path
         }
         let protocol = 'ws'
-        if (windowRef.location.protocol === 'https') {
+        if (windowRef.location.protocol === 'https:') {
             protocol = 'wss'
         }
         return `${protocol}://${windowRef.location.host}/${path}`

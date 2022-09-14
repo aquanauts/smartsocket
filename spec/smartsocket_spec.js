@@ -93,7 +93,7 @@ describe('Smartsocket', () => {
 
     it('can detect the right protocol for the URL', async () => {
         windowRef.location.host = 'localhost:8080'
-        windowRef.location.protocol = 'https'
+        windowRef.location.protocol = 'https:'
         context.connect("routes/ws")
         expect(Object.keys(windowRef.sockets)).toContain("wss://localhost:8080/routes/ws")
     });
